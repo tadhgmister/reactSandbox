@@ -2,10 +2,10 @@ import React from 'react';
 import logo from './logo.svg';
 import './App.css';
 import {HookedComponent} from './lib/hooklib';
-
+import Counter from './lib/test';
 
 class App extends HookedComponent<{}> {
-  public static JSX = HookedComponent.finalize(App);
+  // public static JSX = HookedComponent.finalize(App);
   public useRender(){
     return (
       <div className="App">
@@ -22,10 +22,11 @@ class App extends HookedComponent<{}> {
           >
             Learn React
           </a>
+          <Counter />
         </header>
       </div>
     );
   }
 }
 
-export default App.JSX;
+export default HookedComponent.finalize(App);
