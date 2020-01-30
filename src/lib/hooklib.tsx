@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {assert, Record} from './util';
+import {assert} from './util';
 ////////// GEN EFFECT
 
 
@@ -141,16 +141,6 @@ type REQUEST_UPDATE = typeof REQUEST_UPDATE
  * 
  * Note that if a constructor is 
  */
-// eslint-disable-next-line @typescript-eslint/no-namespace
-export declare module HookedComponent {
-    /**
-     * due to limitations in typescript, if a class generic is not used anywhere in it's constructor parameters
-     * then the finalize method can't forward the generic as expected.
-     * In order to overcome this we use this as the type of the argument to the constructor so that we can preserve the generic.
-     */
-    export type INIT_ARG<P> = P & void;
-}
-// eslint-disable-next-line no-redeclare
 export abstract class HookedComponent<Props = React.PropsWithChildren<{}>> {
     /**
      * The constructor to HookedComponent will always be called with no arguments.
@@ -167,7 +157,15 @@ export abstract class HookedComponent<Props = React.PropsWithChildren<{}>> {
      * @param props props passed to component.
      */
     protected abstract useRender(props: Props): React.ReactElement | null;
-
+    /**
+     * This is an intermediate step for rendering, it should always end with `return this.useRender(props)`
+     * This allows for libraries to call extra hooks before passing to main class rendering.
+     * If this is overriden the class should probably keep useRender as abstract.
+     * @param props props passed to component.
+     */
+    protected _InternaluseRender(props: Props){
+        return this.useRender(props)
+    }
     /**
      * Returns a valid react component to use the HookedComponent class.
      * By convention your class should define a static field called "JSX" like so:
@@ -198,7 +196,7 @@ export abstract class HookedComponent<Props = React.PropsWithChildren<{}>> {
                 return {};
             }, {})[1]
             React.useImperativeHandle(ref, ()=>inst, [inst]);
-            return inst.useRender(props);
+            return inst._InternaluseRender(props);
         })
         Comp.defaultProps = defaultProps as Partial<React.PropsWithoutRef<P>>;
         Comp.displayName = Cls.name;
@@ -257,4 +255,71 @@ export abstract class HookedComponent<Props = React.PropsWithChildren<{}>> {
         }
         return desc as any;
     }
+}
+// eslint-disable-next-line @typescript-eslint/no-namespace, no-redeclare
+export declare module HookedComponent {
+    /**
+     * due to limitations in typescript, if a class generic is not used anywhere in it's constructor parameters
+     * then the finalize method can't forward the generic as expected.
+     * In order to overcome this we use this as the type of the argument to the constructor so that we can preserve the generic.
+     */
+    export type INIT_ARG<P> = P & void;
+}
+/**
+ * if this is passed to useReducer it would completely mimic the behaviour of useState.
+ * 
+ * @param curr current state
+ * @param arg new state or function to mutate state.
+ */
+function defaultReducer<T>(curr: T, arg: T | ((prev: T)=> T)){
+    return typeof arg === "function" ? (arg as (prev: T)=> T)(curr) : arg;
+}
+export function statefulHookedComponent<State, Reducers extends {[K in keyof State]?: (prev: State[K], arg: any)=>State[K]}>(initialState: State, reducers?: Reducers) {
+    const fields = Object.keys(initialState) as (keyof State)[];
+    type Arg<K extends keyof State> = Reducers[K] extends (prev: State[K], arg: infer A)=>State[K] ? A : State[K] | ((prev: State[K])=>State[K])
+    abstract class Stateful<P> extends HookedComponent<P> {
+        /**
+         * updates a ReactState field TODO: more description here.
+         * @param k field to update
+         * @param arg new value or argument to corresponding reducer
+         */
+        protected updateState<K extends keyof State>(k: K, arg: Arg<K>){
+            const dispatch = this._stateful_internal[k][1];
+            assert(dispatch !== undefined, "updateState called before first render.")
+            dispatch(arg)
+        }
+        protected _InternaluseRender(props: P){
+            // ignoring rule of hooks since the order of calls is ensured by defining fields outside the class, there is no way it will change
+            // during the lifetime of a component.
+            for(const field of fields){
+                const reducer = reducers?.[field] ?? defaultReducer;
+                // eslint-disable-next-line react-hooks/rules-of-hooks
+                this._stateful_internal[field] = React.useReducer(reducer, this._stateful_internal[field][0]) as any;
+            }
+            return this.useRender(props);
+        }
+        /**
+         * for each state variable contains the pair [v, dispatch] as returned by React.useReducer
+         * dispatch is initially undefined, if an update triggers before the first render an error will be thrown.
+         */
+        private _stateful_internal = (()=>{
+            type InternalState = {[K in keyof State]: [State[K], undefined | ((a: Arg<K>)=>void)]}
+            const myState: Partial<InternalState> = {}
+            for(const field of fields){
+                // note that this may trigger getters in the initial state if the property is computed.
+                myState[field] = [initialState[field], undefined]
+            }
+            return myState as InternalState;
+        })()
+    }
+    type SS = Omit<Stateful<any>, "_stateful_internal"> & {_stateful_internal: {[K in keyof State]: [State[K], undefined | ((a: Arg<K>)=>void)]}}
+    for(const field of fields){
+        Object.defineProperty(Stateful.prototype, field, {
+            enumerable: true,
+            get(this: SS){
+                return this._stateful_internal[field][0]
+            }
+        })
+    }
+    return Stateful as unknown as {new<P>(NEVER_PASSED?: HookedComponent.INIT_ARG<P>): Stateful<P> & Readonly<State>}
 }

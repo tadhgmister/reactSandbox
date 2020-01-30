@@ -1,7 +1,7 @@
 
 import React from 'react';
 
-import {HookedComponent, useGenEffect} from './hooklib';
+import {HookedComponent, statefulHookedComponent} from './hooklib';
 
 // interface Props<T> {
 //     id: number;
@@ -38,14 +38,11 @@ class Test {
     public x = (console.log("RAN INIT"), "initial")
 }
 
-export class Counter extends HookedComponent<{}> {
+export class Counter extends statefulHookedComponent({count:0})<{}> {
     // static JSX = HookedComponent.finalize(Counter);
-    @HookedComponent.RenderAffecting
-    public count = 0;
     private t = new Test();
     private increment = ()=>{
-        this.count += 1
-        this.count += 1
+        this.updateState("count", count=>count+1);
     }
 
     * check(){

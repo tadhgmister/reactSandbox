@@ -23,6 +23,7 @@ class App extends HookedComponent<{}> {
             Learn React
           </a>
           <Counter />
+          <Counter />
         </header>
       </div>
     );
