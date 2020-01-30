@@ -4,7 +4,8 @@ import './App.css';
 import {HookedComponent} from './lib/hooklib';
 
 
-class App extends HookedComponent() {
+class App extends HookedComponent<{}> {
+  public static JSX = HookedComponent.finalize(App);
   public useRender(){
     return (
       <div className="App">
@@ -27,4 +28,4 @@ class App extends HookedComponent() {
   }
 }
 
-export default App;
+export default App.JSX;

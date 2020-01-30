@@ -1,23 +1,7 @@
 
 import React from 'react';
 
-type Abstraction<P> = {$$NEVER_USED: P};
-
-declare class HookedComponent<P> {
-    constructor(NEVER_PASSED?: Abstraction<P>)
-    // public constructor();
-    useRender(props: P): React.ReactNode;
-}
-
-// types seem to be working now.
-function finalize<P, Inst extends HookedComponent<P>, DK extends keyof AllProps = never, AllProps extends P = P>(Cls: new(NEVER_PASSED?: Abstraction<P>)=>Inst, defaultProps?: Pick<AllProps, DK> | AllProps){
-    // type DK = keyof DefProps;
-    type OutwardProps = Partial<P> & Omit<P, DK> & {ref?: React.Ref<Inst>}
-    function JSXFunc(props: OutwardProps, ref?: React.Ref<Inst>){
-        return null;
-    }
-    return JSXFunc;
-}
+import {HookedComponent} from './hooklib';
 
 interface Props<T> {
     id: number;
@@ -26,16 +10,13 @@ interface Props<T> {
 }
 
 class Example<T> extends HookedComponent<Props<T>>{
-    // constructor(){
-    //     super();
-    // }
-    public static E = finalize(Example);
+    public static JSX = HookedComponent.finalize(Example, {id: 0});
     a: string = "hello";
+    useRender(p: Props<T>){
+        return null;
+    }
 }
-
-// const A = Example.E({})
-
-const B = <Example.E a="hello" id={0} ref={null}/>
-
-
-type TEST = React.ForwardRefExoticComponent;
+declare const refStr: React.Ref<Example<string>>;
+declare const refNum: React.Ref<Example<number>>;
+const a = <Example.JSX a="hello" b="" id={0} ref={refStr}/>
+const b = <Example.JSX a={4} ref={refNum}/>

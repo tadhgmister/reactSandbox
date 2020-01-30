@@ -149,7 +149,7 @@ export abstract class HookedComponent<Props> {
      * @param Cls HookedComponent class
      * @param defaultProps default props for JSX Component
      */
-    public static finalize<
+    protected static finalize<
         P, // props defined inside the class. 
         Inst extends HookedComponent<P>, // instance type of given class. This is what {ref} exposes
         DK extends keyof AllProps = never, // DefaultKeys, keys of P that are given default values. When defaultProps is not given this defaults to never.
@@ -174,18 +174,3 @@ export abstract class HookedComponent<Props> {
         return Comp as any as (props: ExternProps) => React.ReactElement;
     }
 }
-interface Props<T> {
-    id: number;
-    a: T;
-    b?: T;
-}
-
-class Example<T> extends HookedComponent<Props<T>>{
-    public static JSX = HookedComponent.finalize(Example);
-    a: string = "hello";
-    useRender(p: Props<T>){
-        return null;
-    }
-}
-
-const B = <Example.JSX a="hello" b="" id={0} ref={null}/>
