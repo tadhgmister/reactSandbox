@@ -123,6 +123,7 @@ FEATURES:
 
 const REQUEST_UPDATE = Symbol.for("hooklib.REQUEST_UPDATE");
 type REQUEST_UPDATE = typeof REQUEST_UPDATE
+const InternaluseRender = Symbol.for("hooklib.InternalUseRender");
 /**
  * TODO: need to fill in description here
  * 
@@ -163,7 +164,7 @@ export abstract class HookedComponent<Props = React.PropsWithChildren<{}>> {
      * If this is overriden the class should probably keep useRender as abstract.
      * @param props props passed to component.
      */
-    protected _InternaluseRender(props: Props){
+    protected [InternaluseRender](props: Props){
         return this.useRender(props)
     }
     /**
@@ -177,11 +178,11 @@ export abstract class HookedComponent<Props = React.PropsWithChildren<{}>> {
      *     // rest of class.
      * }
      * ```
-     * This way externally can do `<MYCOMPONENT.JSX />` to create components.
+     * This way externally can do `<MYCOMPONENT.JSX />` to create components, or `export default MYCOMPONENT.JSX`
      * @param Cls HookedComponent class
      * @param defaultProps default props for JSX Component
      */
-    public static finalize<
+    protected static finalize<
         P, // props defined inside the class. 
         Inst extends HookedComponent<P>, // instance type of given class. This is what {ref} exposes
         DK extends keyof AllProps = never, // DefaultKeys, keys of P that are given default values. When defaultProps is not given this defaults to never.
@@ -196,7 +197,7 @@ export abstract class HookedComponent<Props = React.PropsWithChildren<{}>> {
                 return {};
             }, {})[1]
             React.useImperativeHandle(ref, ()=>inst, [inst]);
-            return inst._InternaluseRender(props);
+            return inst[InternaluseRender](props);
         })
         Comp.defaultProps = defaultProps as Partial<React.PropsWithoutRef<P>>;
         Comp.displayName = Cls.name;
@@ -221,8 +222,8 @@ export abstract class HookedComponent<Props = React.PropsWithChildren<{}>> {
      */
     private _render_affecting_internal_store = (()=>{
         const store: Partial<this> = {}
-        // TODO: adding ?? {} at the end of this invalidates the type of inits and we can't easily explciitly refer to
-        // the type of this._render_affecting_inits, so instead we are doing ?? {} in the loop below then using ! inside
+        // TODO: adding `?? {}` at the end of this invalidates the type of inits and we can't easily explciitly refer to
+        // the type of this._render_affecting_inits, so instead we are doing `?? {}` in the loop below then using ! inside
         const inits = this._render_affecting_inits ?? ((this as any).__proto__ as this)._render_affecting_inits
         for(const field of Object.keys(inits ?? {}) as (keyof this)[]){
             // first ! is because of issue above, second is because all inits with keys will have valid entries.
@@ -274,6 +275,16 @@ export declare module HookedComponent {
 function defaultReducer<T>(curr: T, arg: T | ((prev: T)=> T)){
     return typeof arg === "function" ? (arg as (prev: T)=> T)(curr) : arg;
 }
+/**
+ * creates a subclass of HookedComponent which defines several readonly properties and a method `updateState`
+ * The behaviour is that when the object is constructed each field specified in `initialState` is effectively copied to the new instance
+ * - note that if initialState defines some getter properties they will be computed for each instance
+ * Then in order to update the field you must call `.updateState` with the name of the field and the new value.
+ * By default the argument to updateState follows same behaviour as useState - either the new value or if the new value depends on the
+ * current value instead a function to update the value.  If different behaviour is desired a second mapping for custom reducers can be specified.
+ * @param initialState initial state, may define getters for properties that should be computed per instance
+ * @param reducers custom reducers, if a field has no reducer specified it defaults to same as setState behaviour
+ */
 export function statefulHookedComponent<State, Reducers extends {[K in keyof State]?: (prev: State[K], arg: any)=>State[K]}>(initialState: State, reducers?: Reducers) {
     const fields = Object.keys(initialState) as (keyof State)[];
     type Arg<K extends keyof State> = Reducers[K] extends (prev: State[K], arg: infer A)=>State[K] ? A : State[K] | ((prev: State[K])=>State[K])
@@ -288,7 +299,7 @@ export function statefulHookedComponent<State, Reducers extends {[K in keyof Sta
             assert(dispatch !== undefined, "updateState called before first render.")
             dispatch(arg)
         }
-        protected _InternaluseRender(props: P){
+        protected [InternaluseRender](props: P){
             // ignoring rule of hooks since the order of calls is ensured by defining fields outside the class, there is no way it will change
             // during the lifetime of a component.
             for(const field of fields){
@@ -296,7 +307,7 @@ export function statefulHookedComponent<State, Reducers extends {[K in keyof Sta
                 // eslint-disable-next-line react-hooks/rules-of-hooks
                 this._stateful_internal[field] = React.useReducer(reducer, this._stateful_internal[field][0]) as any;
             }
-            return this.useRender(props);
+            return super[InternaluseRender](props); 
         }
         /**
          * for each state variable contains the pair [v, dispatch] as returned by React.useReducer

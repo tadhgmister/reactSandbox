@@ -5,7 +5,7 @@ import {HookedComponent} from './lib/hooklib';
 import Counter from './lib/test';
 
 class App extends HookedComponent<{}> {
-  // public static JSX = HookedComponent.finalize(App);
+  public static JSX = HookedComponent.finalize(App);
   public useRender(){
     return (
       <div className="App">
@@ -30,4 +30,4 @@ class App extends HookedComponent<{}> {
   }
 }
 
-export default HookedComponent.finalize(App);
+export default App.JSX;
