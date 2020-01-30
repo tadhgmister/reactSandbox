@@ -40,7 +40,7 @@ class Test {
 
 export class Counter extends HookedComponent<{}> {
     // static JSX = HookedComponent.finalize(Counter);
-    @HookedComponent.LegacystateVar
+    @HookedComponent.RenderAffecting
     public count = 0;
     private t = new Test();
     private increment = ()=>{

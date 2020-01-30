@@ -120,6 +120,9 @@ FEATURES:
   This would allow for a HookedComponent to turn itself into a lazy without needing to run all hooks for intermidiate 
   updates that may occur before the async finishes.
 */
+
+const REQUEST_UPDATE = Symbol.for("hooklib.REQUEST_UPDATE");
+type REQUEST_UPDATE = typeof REQUEST_UPDATE
 /**
  * TODO: need to fill in description here
  * 
@@ -147,6 +150,7 @@ export declare module HookedComponent {
      */
     export type INIT_ARG<P> = P & void;
 }
+// eslint-disable-next-line no-redeclare
 export abstract class HookedComponent<Props = React.PropsWithChildren<{}>> {
     /**
      * The constructor to HookedComponent will always be called with no arguments.
@@ -186,14 +190,14 @@ export abstract class HookedComponent<Props = React.PropsWithChildren<{}>> {
         AllProps extends P = P // this is to ensure that defaultProps does not have P anywhere in it's type so it cannot affect the inference of P
     >(Cls: new(NEVER_PASSED?: HookedComponent.INIT_ARG<P>)=>Inst, defaultProps?: Pick<AllProps, DK> | AllProps){
         const Comp = React.forwardRef<Inst, P>((props, ref)=>{
+            
             // note we can't do useMemo for instance since that doesn't guarentee semantics.
-            const instRef = React.useRef<{inst:Inst, varList: (keyof Inst)[]}>();
-            const {inst, varList} = instRef.current ?? (instRef.current = {inst: new Cls(), varList: Object.keys((Cls.prototype as HookedComponent)._magic_var_inits ?? {}) as (keyof Inst)[]});
+            const instRef = React.useRef<Inst>();
+            const inst = instRef.current ?? (instRef.current = new Cls());
+            inst._request_update = React.useReducer((s: {}, arg: REQUEST_UPDATE)=>{
+                return {};
+            }, {})[1]
             React.useImperativeHandle(ref, ()=>inst, [inst]);
-            for(const field of varList){
-                // eslint-disable-next-line react-hooks/rules-of-hooks
-                inst._magic_var_state[field] = React.useState(inst._magic_var_state[field]![0]);
-            }
             return inst.useRender(props);
         })
         Comp.defaultProps = defaultProps as Partial<React.PropsWithoutRef<P>>;
@@ -207,69 +211,50 @@ export abstract class HookedComponent<Props = React.PropsWithChildren<{}>> {
         return Comp as any as (props: ExternProps) => React.ReactElement;
     }
     /**
-     * this is added to the prototype of classes that define at least one magic state variable
-     * it just holds the list of state variable names, the order is vital to ensure rules of hooks.
+     * this is set on the instance by the component created by finalize.
      */
-    private _magic_var_inits?: {[K in keyof this]?: ()=>this[K]};
-    // /**
-    //  * this is added to the prototype of classes that define at least one magic state variable
-    //  * the compare functions specified in the declaration of the class are stored here.
-    //  */
-    // declare private _magic_var_cmps?: Record<string, (a: any, b: any)=>boolean>;
+    private _request_update?: (arg: REQUEST_UPDATE)=>void;
     /**
-     * holds magic state variables for each instance.
-     * each entry holds the [val, setter] pair returned by React.useState
+     * this is set on the prototype containing the initializers for all render affecting properties.
      */
-    private _magic_var_state = (()=>{
-        const val: {[K in keyof this]?: [this[K], undefined | ((newVal: this[K])=>void)]} = {};
-        const inits = ((this as any).__proto__ as this)._magic_var_inits;
+    private _render_affecting_inits?: {[K in keyof this]?: ()=> this[K]}
+    /**
+     * this stores the variables that are labeled @RenderAffecting. 
+     */
+    private _render_affecting_internal_store = (()=>{
+        const store: Partial<this> = {}
+        // TODO: adding ?? {} at the end of this invalidates the type of inits and we can't easily explciitly refer to
+        // the type of this._render_affecting_inits, so instead we are doing ?? {} in the loop below then using ! inside
+        const inits = this._render_affecting_inits ?? ((this as any).__proto__ as this)._render_affecting_inits
+        for(const field of Object.keys(inits ?? {}) as (keyof this)[]){
+            // first ! is because of issue above, second is because all inits with keys will have valid entries.
+            store[field] = inits![field]!();
+        }
+        return store;
+    })();
+    /**
+     * use this as a decorator on instance variables that rendering depends on.
+     * it will detect when the variable is updated and trigger a re-render accordingly.
+     */
+    protected static RenderAffecting<T extends HookedComponent<any>, K extends keyof T>(proto: T, field: K, d?: {initializer?():T[K]}){
+        assert(d !== undefined && d.initializer !== undefined, "renderAffecting decorator relies on the 3rd argument having an initializer.")
+        let inits = proto._render_affecting_inits;
         if(inits === undefined){
-            console.log("no magic vars, skipping", this)
-            return val;
+            inits = (proto._render_affecting_inits = {})
         }
-        for(const field of (Object.keys(inits ?? {}) as (keyof this)[])){
-            val[field] = [inits[field]!(), undefined]
-        }
-        return val;
-    })()
-    /**
-     * @deprecated the get-set behaviour is no longer supported for react state variables.
-     * recipe:
-     * ```typescript
-     * class MYCOMPONENT extends HookedComponent<{}> {
-     *     @HookedComponent.stateVar
-     *     x = "hello"
-     * }
-     * ```
-     * with the decorator stateVar, updates to the field `this.x` will trigger a react update.
-     * Note that to maintain consistency, after setting the state variable reading it back won't reflect the new value until a 
-     * react update.
-     */
-    protected static LegacystateVar<T extends HookedComponent<any>,K extends string & keyof T>(prototype: T, field: K, pdesc?: {initializer?: ()=>T[K], value?: T[K]}){
-        // add new initializer
-        const inits: typeof prototype._magic_var_inits = (prototype._magic_var_inits ?? (prototype._magic_var_inits = {}));
-        inits[field] = pdesc?.initializer ?? (()=>{if(pdesc?.value){return pdesc.value;} else {throw new Error("no value or initializer")}});
-        // define the descriptor for the field.
-        const descr: PropertyDescriptor = {
-            enumerable: true,
-            configurable: true,
-            get(this:T): T[K]{
-                return this._magic_var_state[field]![0]
+        inits[field] = d.initializer;
+        const desc: PropertyDescriptor = {
+            get(this: T): T[K]{
+                return this._render_affecting_internal_store[field]!
             },
             set(this: T, newVal: T[K]){
-                const dispatch = this._magic_var_state[field]![1];
-                if (dispatch !== undefined){
-                    // we have rendered at least once, dispatch value
-                    dispatch(newVal);
-                }else{
-                    // haven't rendered yet, update value as normal
-                    console.warn("re assigned state var before first render, updating directly.", this, field, newVal);
-                    this._magic_var_state[field]![0] = newVal
+                if(this._render_affecting_internal_store[field] !== newVal){
+                    // _request_update is known to always exist, will need to fix once I can just declare it exists instead of making it optional.
+                    this._request_update!(REQUEST_UPDATE)
                 }
+                this._render_affecting_internal_store[field] = newVal;
             }
         }
-        // Object.defineProperty(prototype, field, descr);
-        return descr as any;
+        return desc as any;
     }
-    
 }
