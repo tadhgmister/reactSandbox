@@ -1,15 +1,13 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
-import {HookedComponent} from './lib/hooklib';
-import Counter from './lib/test';
+import {HookedComponent} from '../lib/hooklib';
+import { Main } from '../lib/reactUtil';
 
-class App extends HookedComponent<{}> {
-  public static JSX = HookedComponent.finalize(App);
+export class App extends HookedComponent<{}> {
   public useRender(){
     return (
-      <div className="App">
-        <header className="App-header">
+      <Main className="App">
           <img src={logo} className="App-logo" alt="logo" />
           <p>
             Edit <code>src/App.js</code> and save to reload.
@@ -22,12 +20,11 @@ class App extends HookedComponent<{}> {
           >
             Learn React
           </a>
-          <Counter />
-          <Counter />
-        </header>
-      </div>
+        </Main>
     );
   }
+  public static JSX: typeof _JSX;
 }
-
+const _JSX = App.finalize(App);
+App.JSX = _JSX;
 export default App.JSX;

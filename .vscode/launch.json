@@ -9,19 +9,16 @@
             "type": "chrome",
             "request": "launch",
             "url": "http://localhost:3000",
-            "webRoot": "${workspaceFolder}/wwwroot"
+            "webRoot": "${workspaceFolder}/wwwroot",
+            "userDataDir": false
         },
         {
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
+            "skipFiles": ["<node_internals>/**"],
             "program": "${workspaceFolder}/start",
-            "outFiles": [
-                "${workspaceFolder}/**/*.js"
-            ]
-        },
+            "outFiles": ["${workspaceFolder}/**/*.js"]
+        }
     ]
 }

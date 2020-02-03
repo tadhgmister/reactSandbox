@@ -1,20 +1,35 @@
+export default null;
+// import React from 'react';
+// import ReactDOM from 'react-dom'
+// import {HookedComponent, statefulHookedComponent, GenEffect, useGenEffect} from './hooklib';
+// import { assert } from './util';
 
-import React from 'react';
+// export class Popout extends HookedComponent {
+//     private myWindow?: Window;
+//     @HookedComponent.RenderAffecting
+//     public mainDiv?: HTMLElement;
 
-import {HookedComponent, statefulHookedComponent} from './hooklib';
-
-export class Counter extends statefulHookedComponent({count:0})<{}> {
-    static JSX = HookedComponent.finalize(Counter);
-
-    private increment = ()=>{
-        this.updateState("count", count=>count+1);
-    }
-    public useRender(){
-        // useGenEffect(this.check())
-        return <button onClick={this.increment}>
-            I've been clicked {this.count} times!
-        </button>
-    }
-}
-// HookedComponent.magicStatePostStep(Counter.prototype, ["count"])
-export default Counter.JSX;//HookedComponent.finalize(Counter);
+//     public useRender(props: React.PropsWithChildren<{}>){
+//         if(this.mainDiv){
+//             return ReactDOM.createPortal(props.children, this.mainDiv);
+//         }
+//         return <div style={{backgroundColor: "lightgreen"}}>
+//             <button onClick={this.move_to_own_window}>move to window</button>
+//             {props.children}
+//         </div>;
+//     }
+//     private move_to_own_window = ()=>{
+//         const win = window.open("","");
+//         if(win === null){
+//             alert("failed to open new window")
+//             return
+//         }
+//         this.myWindow = win;
+//         win.document.write(`<div id="main"></div>`);
+//         this.mainDiv = win.document.getElementById("main")!
+//     }
+//     public static JSX: typeof _JSX;
+// }
+// const _JSX = HookedComponent.finalize(Popout);
+// Popout.JSX = _JSX;
+// export default _JSX;
