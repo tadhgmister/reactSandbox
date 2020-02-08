@@ -3,7 +3,7 @@ import { HookedComponent, useGenEffect } from "src/lib/hooklib";
 import { assert } from "./util";
 import ReactDOM from "react-dom";
 import { Stylesheet } from "./reactUtil";
-import { effectEventListener } from "./hooks";
+import { geneffs } from "./hooks";
 export interface PopoutProps extends _DefaultProps, React.PropsWithChildren<{}> {
     /**
      * styles applied to container when present in the main window,
@@ -44,7 +44,7 @@ export class Popout extends HookedComponent<PopoutProps> {
         this.wWidth = props.w;
         this.wHeight = props.h;
         useGenEffect(this.setWindowTitle(props.name));
-        useGenEffect(effectEventListener("unload", this.closeWindow));
+        useGenEffect(geneffs.eventListener("unload", this.closeWindow));
         React.useEffect(() => this.closeWindow, []);
         if (this.bodyElem !== null) {
             const stylesheet =
@@ -74,7 +74,11 @@ export class Popout extends HookedComponent<PopoutProps> {
         // don't do anything if we already have a window
         if (this.window !== null) return;
 
-        this.window = window.open("", "", `menubar=no,status=no,titlebar=yes,toolbar=no,width=${this.wWidth},height=${this.wHeight}`);
+        this.window = window.open(
+            "",
+            "",
+            `menubar=no,status=no,titlebar=yes,toolbar=no,width=${this.wWidth},height=${this.wHeight}`,
+        );
         if (this.window === null) {
             alert("failed to open new window.");
             return;
