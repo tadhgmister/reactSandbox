@@ -9,9 +9,9 @@ function* withClassName<HTMLElem extends { classList: DOMTokenList } = HTMLEleme
 ) {
     yield arguments;
     if (elem === null) return;
-    elem.classList.add(classname);
+    elem.classList.add(...classname.split(" "));
     yield;
-    elem.classList.remove(classname);
+    elem.classList.remove(...classname.split(" "));
 }
 interface StylesheetProps {
     /**

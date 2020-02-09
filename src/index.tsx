@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
 import * as serviceWorker from "./serviceWorker";
-import { BrowserRouter, Link, Switch, Route } from "react-router-dom";
+import { BrowserRouter, Link, Switch, Route, useLocation } from "react-router-dom";
 import { makeLazyLoadSwitch, Main } from "./lib/reactUtil";
 
 const paths = {
@@ -28,12 +28,14 @@ function OpeningScreen() {
     );
 }
 function Nav() {
+    const {pathname} = useLocation();
+    console.log("YOU ARE HERE:", pathname)
     return ReactDOM.createPortal(
         <nav>
             <Switch>
                 <Route exact path="/" />
                 <Route>
-                    <Link to="/">Back to home</Link>
+                    <Link to={pathname+"/.."}>Back</Link>
                 </Route>
             </Switch>
         </nav>,
