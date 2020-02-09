@@ -1,3 +1,3 @@
-import d from './store';
+import d from "./store";
 export * from "./store";
 export default d;

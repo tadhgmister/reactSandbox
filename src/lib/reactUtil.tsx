@@ -1,6 +1,6 @@
 import React from "react";
 import { Switch, Route, RouteComponentProps } from "react-router";
-import { isA, ObjectEntries, waitUntilIdle } from "./util";
+import { isA, ObjectEntries } from "./util";
 import { useGenEffect } from "./hooklib";
 
 function* withClassName<HTMLElem extends { classList: DOMTokenList } = HTMLElement>(
@@ -61,9 +61,9 @@ export function Main({ children, style, className }: MainProps) {
 }
 
 type LazyLoad =
-    | { exact?: boolean; comp: React.ComponentType<RouteComponentProps> }
+    | { exact?: boolean; comp: React.ComponentType<{ ref?: any }> }
     | (() => Promise<{
-          default: React.ComponentType<RouteComponentProps>;
+          default: React.ComponentType<{ ref?: any }>;
       }>);
 /**
  * takes a map of path to one of:
