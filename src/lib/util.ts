@@ -109,17 +109,16 @@ export function ObjectEntries<T, V extends T[keyof T] = T[keyof T]>(
 export function isDefined<T>(obj: T): obj is Exclude<T, undefined> {
     return obj !== undefined;
 }
-// /**
-//  * returns a new object which is a subset of passed data, only containing keys-values that met the predicate
-//  * @param data data
-//  * @param predicate predicate to choose which keys to keep
-//  */
-// export function Partial<T, A extends T[keyof T]>(data: T, predicate: ((val: T[keyof T], key: keyof T)=> val is A)){
-//     const result: Partial<Record<keyof T, A>> = {};
-//     for(const [k,v] of ObjectEntries(data)){
-//         if(predicate(v, k)){
-//             result[k] = v;
-//         }
-//     }
-//     return result as unknown as Pick<T, { [K in keyof T]: T[K] extends A ? K : never; }[keyof T]>;
-// }
+
+
+export async function fetchFolderContent(subPath = ""){
+    const response = await fetch("/api/indexof/"+subPath);
+    const body = await response.text();
+    if(body == "null"){
+        throw new Error("invalid folder name: "+subPath)
+    }
+    return JSON.parse(body) as string[];
+    //.then(data=>data.text().then(data=>{
+    //     this.setState({songs: JSON.parse(data)});
+    // }));
+}

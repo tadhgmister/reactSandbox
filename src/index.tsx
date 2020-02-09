@@ -10,6 +10,7 @@ const paths = {
     "/splash": () => import("./Splash/App"),
     "/demos": () => import("./Demos/demos"),
     "/asteroids": () => import("./Asteroids/Game"),
+    "/glee/": ()=>import("./GLEEEEE/HOOOOME"),
 };
 const Routes = makeLazyLoadSwitch(paths);
 function OpeningScreen() {
