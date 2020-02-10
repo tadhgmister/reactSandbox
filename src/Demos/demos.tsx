@@ -29,7 +29,13 @@ class PopoutDemo extends HookedComponent {
             <div style={{ backgroundColor: "rgba(255,0,0,0.3)" }}>
                 You clicked {this.count} times!
                 <Popout.JSX w={100} h={100} style={{ backgroundColor: "lightgreen" }}>
-                    <button onClick={() => this.count++}>CLICK ME!</button>
+                    <button
+                        onClick={() => {
+                            this.count += 1;
+                        }}
+                    >
+                        CLICK ME!
+                    </button>
                 </Popout.JSX>
             </div>
         );

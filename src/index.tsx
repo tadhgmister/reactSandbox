@@ -3,39 +3,27 @@ import ReactDOM from "react-dom";
 import "./index.css";
 import * as serviceWorker from "./serviceWorker";
 import { BrowserRouter, Link, Switch, Route, useLocation } from "react-router-dom";
-import { makeLazyLoadSwitch, Main } from "./lib/reactUtil";
+import { makeCompSwitch } from "./lib/reactUtil";
 
-const paths = {
-    "/": { exact: true, comp: OpeningScreen },
-    "/splash": () => import("./Splash/App"),
-    "/demos": () => import("./Demos/demos"),
-    "/asteroids": () => import("./Asteroids/Game"),
-    "/glee/": ()=>import("./GLEEEEE/HOOOOME"),
-};
-const Routes = makeLazyLoadSwitch(paths);
-function OpeningScreen() {
-    return (
-        <Main className="opening-page">
-            Welcome to the website! here is a list of valid places to go:
-            <ul>
-                {Object.keys(paths).map(path => (
-                    <li key={path}>
-                        <Link to={path}>{path}</Link>
-                    </li>
-                ))}
-            </ul>
-        </Main>
-    );
-}
+const Routes = makeCompSwitch({
+    "splash/": React.lazy(() => import("./Splash/App")),
+    "demos/": React.lazy(() => import("./Demos/demos")),
+    "asteroids/": React.lazy(() => import("./Asteroids/Game")),
+    "gleemusic/": React.lazy(() => import("./GLEEEEE/HOOOOME")),
+});
+
 function Nav() {
-    const {pathname} = useLocation();
-    console.log("YOU ARE HERE:", pathname)
+    const { pathname } = useLocation();
+    const pathlevels = pathname.split("/");
+    const levelstoremove = pathname.endsWith("/") ? 2 : 1;
+    const backPath = pathlevels.slice(0, pathlevels.length - levelstoremove).join("/");
     return ReactDOM.createPortal(
         <nav>
             <Switch>
                 <Route exact path="/" />
+                {/* for any route other than root, create a link going back a page. */}
                 <Route>
-                    <Link to={pathname+"/.."}>Back</Link>
+                    <Link to={backPath}>Back</Link>
                 </Route>
             </Switch>
         </nav>,
@@ -66,7 +54,7 @@ ReactDOM.render(
         <Nav />
         <React.Suspense fallback="LOADING!">
             <ErrorCatch>
-                <Routes>PAGE COULD NOT BE FOUND</Routes>
+                <Routes />
             </ErrorCatch>
         </React.Suspense>
     </BrowserRouter>,

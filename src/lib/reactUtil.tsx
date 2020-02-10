@@ -1,7 +1,8 @@
 import React from "react";
-import { Switch, Route, RouteComponentProps } from "react-router";
-import { isA, ObjectEntries } from "./util";
+import { Switch, Route, RouteComponentProps, useRouteMatch, Redirect } from "react-router";
+import { isA, ObjectEntries, ObjectKeys } from "./util";
 import { useGenEffect } from "./hooklib";
+import { Link } from "react-router-dom";
 
 function* withClassName<HTMLElem extends { classList: DOMTokenList } = HTMLElement>(
     elem: HTMLElem | null,
@@ -60,39 +61,48 @@ export function Main({ children, style, className }: MainProps) {
     );
 }
 
-type LazyLoad =
-    | { exact?: boolean; comp: React.ComponentType<{ ref?: any }> }
-    | (() => Promise<{
-          default: React.ComponentType<{ ref?: any }>;
-      }>);
+type Comp<P> =
+    | ((props: P) => React.ReactElement | null)
+    | (new (props: P) => React.Component<P, any>);
+
 /**
- * takes a map of path to one of:
- * - function to be passed to React.lazy, so ()=>import("MODULE")
- * - object with 'comp' to a react component and optionally 'exact' set to true to match only exact path.
- * returns a component that renders the components when the paths match, if none of the paths match
- * then the children of the component is rendered.  The component also optionally takes a prop 'preamble'
- * which is rendered inside the switch before all the routes, this lets you specify reroutes or special routes.
- * @param mapping {"/PATH": ()=>import("MODULE"), ...}
+ * trims leading and trailing slashes in given string
  */
-export function makeLazyLoadSwitch(mapping: Record<string, LazyLoad>) {
-    const routes: React.ReactNode[] = [];
-    for (const [path, comp] of Object.entries(mapping)) {
-        if (isA("function", comp)) {
-            routes.push(<Route key={path} path={path} component={React.lazy(comp)} />);
-        } else {
-            routes.push(<Route key={path} path={path} component={comp.comp} exact={comp.exact} />);
-        }
-    }
-    return function PathSwitch({
-        children,
-        preamble,
-    }: React.PropsWithChildren<{ preamble?: React.ReactNode }>) {
-        return (
+function trimSlashes(str: string) {
+    return str.replace(/^\/+/, "").replace(/\/+$/, "");
+}
+export function makeCompSwitch<K extends string>(paths: Record<K, Comp<{}>>) {
+    function RouteSwitch() {
+        const match = useRouteMatch();
+        const isProper = match.path.endsWith("/");
+        const rootPath = isProper ? match.path : match.path + "/";
+        const routes = ObjectEntries(paths).map(([path, comp]) => (
+            <Route key={path} path={rootPath + path} component={comp} />
+        ));
+        const indexPage = () => {
+            return (
+                <Main className="index">
+                    <ul>
+                        {ObjectKeys(paths).map(path => (
+                            <li key={path}>
+                                <Link to={rootPath + path}>{trimSlashes(path)}</Link>
+                            </li>
+                        ))}
+                    </ul>
+                </Main>
+            );
+        };
+        const fallback = <p>404 page not found</p>;
+
+        return !isProper ? (
+            <Redirect to={rootPath} />
+        ) : (
             <Switch>
-                {preamble}
+                <Route path={rootPath} exact component={indexPage} />
                 {routes}
-                <Route>{children}</Route>
+                <Route>{fallback}</Route>
             </Switch>
         );
-    };
+    }
+    return RouteSwitch;
 }

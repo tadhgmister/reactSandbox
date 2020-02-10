@@ -3,7 +3,7 @@ import { assert } from "./util";
 
 const FORWARD_REF_TYPE = (React.forwardRef((p, r) => null) as any).$$typeof;
 assert(FORWARD_REF_TYPE !== undefined, "forward ref type not determined");
-
+type A = React.ReactNode;
 type NonUndefinedKeys<T> = { [K in keyof T]: T[K] extends undefined ? never : K }[keyof T];
 type ResolveProps<
     Inst extends HookComp<any>,
