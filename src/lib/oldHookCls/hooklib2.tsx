@@ -1,5 +1,5 @@
 import React from "react";
-import { assert } from "./util";
+import { assert } from "../util";
 
 const FORWARD_REF_TYPE = (React.forwardRef((p, r) => null) as any).$$typeof;
 assert(FORWARD_REF_TYPE !== undefined, "forward ref type not determined");

@@ -1,6 +1,75 @@
-// import React from 'react';
-import { effectFactory, useGenEffect } from "./hooklib";
 import React from "react";
+import { assert } from "./util";
+////////// GEN EFFECT
+
+export type GenEffect = Iterator<IArguments | any[] | undefined | void, void | (() => void)>;
+
+function isValidDependencies(val: any): val is React.DependencyList {
+    // REact doesn't officially support IArguments objects but it does support indexing needed
+    return val instanceof Array || Object.prototype.toString.call(val) === "[object Arguments]";
+}
+/**
+ * runs a react effect that is specified by a GenEffect function.
+ * A GenEffect function is a generator function that starts with yielding it's arguments
+ * (this is used as the dependency list for the effect to rerun) or an alternate depedency list
+ * then does effect. If there is cleanup you can either return a cleanup function like standard in useEffect
+ * or do yield a second time then do cleanup after that.
+ * function* effect1(args){
+ *     yield arguments // this is actual "arguments" keyword
+ *     // do effect
+ *     yield
+ *     // do cleanup
+ * }
+ * function* effect2(args){
+ *     yield arguments
+ *     // do effect
+ *     return ()=>{
+ *           // cleanup here
+ *     }
+ * }
+ *
+ * @param effect genEffect to run.
+ * @see GenEffect
+ */
+export function useGenEffect(effect: GenEffect) {
+    const { value: deps, done } = effect.next();
+    assert(!done, "gen effect did not yield dependencies");
+    assert(isValidDependencies(deps), "gen effect must yield arguments or a list of dependencies.");
+    return React.useEffect(() => {
+        const result = effect.next();
+        if (result.done) {
+            // no second yield, return value may be cleanup function.
+            return result.value;
+        }
+        // otherwise there was a second yield, ensure no data was given
+        assert(result.value === undefined, "second yield cannot produce data.");
+        return () => {
+            const final = effect.next();
+            assert(final.done, "gen effect did not exit after cleanup.");
+            assert(
+                final.value === undefined,
+                "gen effect returned value with 2 yield form which is not allowed.",
+            );
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [...deps]);
+}
+
+export function effectFactory<A extends any[], R>(
+    callback: (...args: A) => R,
+    cleanup: (this: R, ...args: A) => void,
+) {
+    function* Effect(...args: A): GenEffect {
+        yield args;
+        const r = callback(...args);
+        yield;
+        cleanup.apply(r, args);
+    }
+    return Effect;
+}
+// TODO: need to figure out how to let the first overload get used instead of the more general one
+// effectFactory will preserve generics, but not if the last overload is totally not useful.
+
 /** call signature of addEventListener and removeEventListener with useful generics */
 type _NiceOverload = <K extends keyof WindowEventMap>(
     type: K,
@@ -18,7 +87,7 @@ export const geneffs = {
     ),
     /** applies focus to the referenced element when takeFocus switches to true. */
     *focus(ref: React.RefObject<HTMLElement>, takeFocus: boolean) {
-        yield arguments;
+        yield [ref.current, takeFocus];
         if (takeFocus && ref.current) ref.current.focus();
     },
 };

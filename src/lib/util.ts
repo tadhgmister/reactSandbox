@@ -110,12 +110,11 @@ export function isDefined<T>(obj: T): obj is Exclude<T, undefined> {
     return obj !== undefined;
 }
 
-
-export async function fetchFolderContent(subPath = ""){
-    const response = await fetch("/api/indexof/"+subPath);
+export async function fetchFolderContent(subPath = "") {
+    const response = await fetch("/api/indexof/" + subPath);
     const body = await response.text();
-    if(body == "null"){
-        throw new Error("invalid folder name: "+subPath)
+    if (body === "null") {
+        throw new Error("invalid folder name: " + subPath);
     }
     return JSON.parse(body) as string[];
     //.then(data=>data.text().then(data=>{

@@ -1,5 +1,5 @@
 import React from "react";
-import { HookComp } from "src/lib/hooklib2";
+import { HookComp } from "src/lib/oldHookCls/hooklib2";
 import { makeCompSwitch } from "src/lib/reactUtil";
 import { SongPage } from "./SongPage";
 // import { Link, Switch, Route } from "react-router-dom";

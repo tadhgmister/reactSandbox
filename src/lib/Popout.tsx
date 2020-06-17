@@ -1,10 +1,11 @@
 import React from "react";
-import { HookedComponent, useGenEffect } from "src/lib/hooklib";
-import { assert } from "./util";
-import ReactDOM from "react-dom";
+import { HookCls } from "src/lib/hookcls";
+import { useGenEffect, geneffs } from "./hooks";
 import { Stylesheet } from "./reactUtil";
-import { geneffs } from "./hooks";
-export interface PopoutProps extends _DefaultProps, React.PropsWithChildren<{}> {
+import ReactDOM from "react-dom";
+import { assert } from "./util";
+/** all props for Popout */
+interface Popout_AllProps extends React.PropsWithChildren<Popout_DefProps> {
     /**
      * styles applied to container when present in the main window,
      * or styles applied to body of window when content is moved to the new window
@@ -18,8 +19,9 @@ export interface PopoutProps extends _DefaultProps, React.PropsWithChildren<{}> 
      * height of opened window in pixels, must be >=  100
      */
     h: number;
-}
-class _DefaultProps {
+} // required props go in here.
+/** props defined with default values. */
+class Popout_DefProps {
     /**
      * title of window and className used when not open in a new window
      */
@@ -30,17 +32,18 @@ class _DefaultProps {
     Tag: keyof React.ReactHTML = "aside";
 }
 /**
- * Container that supports popping out the contents into a seperate window.
- * This is useful for side menus or toolbars to float next to the main window.
- * note that in JSX you need to use <Popout.JSX>
+ * Container that supports popping out the content into a seperate window
+ * this may prove useful for side menus that might want to decide which side of screen etc
+ * or spreading an app over multiple displays if that would be useful.
  */
-export class Popout extends HookedComponent<PopoutProps> {
+export class Popout_Cls extends HookCls<Popout_AllProps> {
+    public static defaultProps = new Popout_DefProps();
     private window: Window | null = null;
-    @HookedComponent.RenderAffecting
+    @HookCls.RenderAffecting
     private bodyElem: HTMLBodyElement | null = null;
     private wWidth: number = 100;
     private wHeight: number = 100;
-    public useRender(props: PopoutProps) {
+    protected useRender(props: Popout_AllProps) {
         this.wWidth = props.w;
         this.wHeight = props.h;
         useGenEffect(this.setWindowTitle(props.name));
@@ -99,10 +102,14 @@ export class Popout extends HookedComponent<PopoutProps> {
         this.window = null;
         this.bodyElem = null;
     };
-
-    /** valid react component for this class, to be used in JSX code. */
-    public static JSX: typeof _JSX;
 }
-const _JSX = HookedComponent.finalize(Popout, new _DefaultProps());
-Popout.JSX = _JSX;
-export default Popout.JSX;
+/**
+ * react component to implement Popout_Cls hook class.
+ * @see Popout_Cls for full details
+ */
+export const Popout = Popout_Cls.createComponent();
+/** type is an alias to Popout_Cls so that importing react component also imports ref type */
+export type Popout = Popout_Cls;
+export default Popout;
+/** props for Popout taking into account default props being optional */
+export type PopoutProps = Omit<Popout_AllProps, keyof Popout_DefProps> & Partial<Popout_AllProps>;

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { assert } from "./util";
+import { assert } from "../util";
 ////////// GEN EFFECT
 
 export type GenEffect = Iterator<IArguments | any[] | undefined | void, void | (() => void)>;

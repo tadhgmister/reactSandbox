@@ -1,17 +1,28 @@
 import React from "react";
-import { HookedComponent } from "src/lib/hooklib";
-export interface MYCOMPONENTProps extends _DefaultProps, React.PropsWithChildren<{}> {
-  // required props here
+import { HookCls } from "src/lib/hookcls";
+/** all props for MYCOMP */
+interface MYCOMP_AllProps extends React.PropsWithChildren<MYCOMP_DefProps> {} // required props go in here.
+/** props defined with default values. */
+class MYCOMP_DefProps {
+    // props with default values here. remember to document all props
 }
-class _DefaultProps {/* props with default values here */}
 /**
- * TODO: add description
- * note that in JSX you need to use <MYCOMPONENT.JSX>
+ * TODO: DESCRIBE CLASS HERE
  */
-class _MYCOMPONENT extends HookedComponent<MYCOMPONENTProps> {
-  public useRender(props: MYCOMPONENTProps) {
-    return null; // TODO
-  }
+export class MYCOMP_Cls extends HookCls<MYCOMP_AllProps> {
+    public static defaultProps = new MYCOMP_DefProps();
+    protected useRender(props: MYCOMP_AllProps) {
+        // can call hooks here. fill in rendering.
+        return <>{props.children}</>;
+    }
 }
-export const MYCOMPONENT = HookedComponent.finalize(_MYCOMPONENT, new _DefaultProps());
-export type MYCOMPONENT = _MYCOMPONENT;
+/**
+ * react component to implement MYCOMP_Cls hook class.
+ * @see MYCOMP_Cls for full details.
+ */
+export const MYCOMP = MYCOMP_Cls.createComponent();
+/** type is an alias to MYCOMP_Cls so that importing react component also imports ref type */
+export type MYCOMP = MYCOMP_Cls;
+export default MYCOMP;
+/** props for MYCOMP taking into account default props being optional */
+export type MYCOMPProps = Omit<MYCOMP_AllProps, keyof MYCOMP_DefProps> & Partial<MYCOMP_AllProps>;

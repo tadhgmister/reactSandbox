@@ -1,8 +1,8 @@
 import React from "react";
+import { HookCls } from "src/lib/hookcls";
 import { Main } from "src/lib/reactUtil";
 import { useIntermittentUpdate } from "src/lib/gameHelpers";
 import { Actor } from "./Actor";
-import { HookComp } from "src/lib/hooklib2";
 /**
  * makes a callback that can take the time in ms since last time it was called and
  * will call the passed function in the given interval, the callback should return the time
@@ -24,23 +24,31 @@ function makeTimeoutCallback(initialWait: number, callback: () => number) {
 const SPEED = 0.1;
 const ASTEROID_SIZE = 10;
 const CANVAS_WIDTH = 200;
-class _Game extends HookComp {
-    @HookComp.RenderAffecting
+
+/**
+ * Game of asteroids, rendered inside a fixed size svg
+ */
+export class Game_Cls extends HookCls {
+    @HookCls.RenderAffecting
+    private message = "not done";
+    @HookCls.RenderAffecting
     public asteroids: Array<{ x: number; y: number; key: number }> = [{ x: 0, y: 100, key: 1 }];
     private stop_updating = false;
     private asterref = React.createRef<Actor>();
-    public useRender() {
+    protected useRender() {
         useIntermittentUpdate(this.update);
         if (this.asteroids?.[0].x > 100) {
             this.stop_updating = true;
             console.log("ASTER", this.asterref.current);
             console.log("GAME", this);
+            this.message = "NOW DONE";
         }
         return (
             <Main className="Asteroids">
+                {this.message}
                 <svg width={CANVAS_WIDTH} height={200}>
                     {this.asteroids.map(ast => (
-                        <Actor.JSX {...ast} ref={this.asterref} />
+                        <Actor {...ast} ref={this.asterref} />
                     ))}
                 </svg>
             </Main>
@@ -48,14 +56,17 @@ class _Game extends HookComp {
     }
     private update = (time: number) => {
         if (this.stop_updating) return;
-        this.asteroids = this.asteroids.map(({ x, ...rest }) => ({ x: x + time * SPEED, ...rest }));
+        this.asteroids = this.asteroids.map(({ x, ...rest }) => ({
+            x: x + time * SPEED,
+            ...rest,
+        }));
 
-        this._request_update?.();
+        //this._force_update?.();
     };
     private *updateAsteroids(time: number, asteroids: this["asteroids"]) {
         for (const asteroid of asteroids) {
-            asteroid.x -= SPEED * time;
-            if (asteroid.x > -ASTEROID_SIZE) {
+            asteroid.x += SPEED * time;
+            if (asteroid.x < CANVAS_WIDTH + ASTEROID_SIZE) {
                 yield asteroid;
             }
         }
@@ -65,6 +76,61 @@ class _Game extends HookComp {
         return 1000;
     });
 }
-export const Game = HookComp.finalize(_Game);
-export type Game = _Game;
+/**
+ * react component to implement Game_Cls hook class.
+ * @see Game_Cls for full details
+ */
+export const Game = Game_Cls.createComponent();
+/** type is an alias to Game_Cls so that importing react component also imports ref type */
+export type Game = Game_Cls;
 export default Game;
+
+// export const Game = HookCls.reactify(
+//     {},
+//     class Game extends HookCls<{}> {
+// @HookCls.RenderAffecting()
+// public asteroids: Array<{ x: number; y: number; key: number }> = [{ x: 0, y: 100, key: 1 }];
+// private stop_updating = false;
+// private asterref = React.createRef<Actor>();
+//         public useRender() {
+// useIntermittentUpdate(this.update);
+// if (this.asteroids?.[0].x > 100) {
+//     this.stop_updating = true;
+//     console.log("ASTER", this.asterref.current);
+//     console.log("GAME", this);
+// }
+// return (
+//     <Main className="Asteroids">
+//         <svg width={CANVAS_WIDTH} height={200}>
+//             {this.asteroids.map(ast => (
+//                 <Actor {...ast} ref={this.asterref} />
+//             ))}
+//         </svg>
+//     </Main>
+// );
+//         }
+// private update = (time: number) => {
+// if (this.stop_updating) return;
+// this.asteroids = this.asteroids.map(({ x, ...rest }) => ({
+//     x: x + time * SPEED,
+//     ...rest,
+// }));
+
+// this._force_update?.();
+// };
+// private *updateAsteroids(time: number, asteroids: this["asteroids"]) {
+//     for (const asteroid of asteroids) {
+//         asteroid.x -= SPEED * time;
+//         if (asteroid.x > -ASTEROID_SIZE) {
+//             yield asteroid;
+//         }
+//     }
+// }
+// private makeAsteroids = makeTimeoutCallback(0, () => {
+//     this.asteroids.push();
+//     return 1000;
+// });
+//     },
+// );
+
+// export default Game;

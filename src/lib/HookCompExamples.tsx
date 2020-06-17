@@ -1,6 +1,8 @@
 import React from "react";
-import { HookedComponent, statefulHookedComponent, useGenEffect } from "./hooklib";
-import { geneffs } from "./hooks";
+import { HookCls } from "./hookcls";
+
+import { geneffs, useGenEffect } from "./hooks";
+import { HookedComponent, statefulHookedComponent } from "./oldHookCls/hooklib1";
 
 interface Point {
     x: number;

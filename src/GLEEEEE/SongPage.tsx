@@ -2,7 +2,8 @@ import React from "react";
 // import { HookedComponent } from "src/lib/hooklib";
 import { Main } from "src/lib/reactUtil";
 import { fetchFolderContent } from "src/lib/util";
-import { HookComp } from "src/lib/hooklib2";
+import { HookComp } from "src/lib/oldHookCls/hooklib2";
+import { Link } from "react-router-dom";
 function isValidAudio(filename: string) {
     return [".mp3", ".m4a", ".wav"].some(ext => filename.endsWith(ext));
 }
@@ -31,9 +32,17 @@ export class SongPage extends HookComp {
                 <aside className="music-list">
                     {this.audioFiles.map(file => (
                         <React.Fragment key={file}>
-                            <p>{file}</p>
+                            <p>
+                                <a
+                                    href={this.rootFolder + file}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    {file}
+                                </a>
+                            </p>
                             <audio src={this.rootFolder + file} controls={true}>
-                                UNSUPORTEEEEEEDDDDDDDDD!!!!! :(
+                                the audio tag is not supported on this browser.
                             </audio>
                         </React.Fragment>
                     ))}
@@ -48,6 +57,7 @@ export class SongPage extends HookComp {
         } else {
             return (
                 <embed
+                    className="embeddedLyrics"
                     style={{ flexGrow: 1 }}
                     src={this.rootFolder + this.lyricsFile}
                     type="application/pdf"

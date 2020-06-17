@@ -1,6 +1,6 @@
 import React from "react";
 import { ObjectEntries, waitUntilIdle } from "./util";
-import { useGenEffect } from "./hooklib";
+import { useGenEffect } from "./hooks";
 // import { useGenEffect } from "./hooklib";
 // import { waitUntilIdle } from "./util";
 

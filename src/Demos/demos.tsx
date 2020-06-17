@@ -1,9 +1,10 @@
 import React from "react";
-import { HookedComponent } from "src/lib/hooklib";
+import { HookedComponent } from "src/lib/oldHookCls/hooklib1";
 import { Popout } from "src/lib/Popout";
 import { Main } from "src/lib/reactUtil";
 import store from "src/redux";
 import * as actions from "src/redux/actions";
+import { useFormInput } from "src/lib/hooks";
 export class Demos extends HookedComponent {
     public useRender() {
         const bg = store.useState(({ theme }) => theme.bg);
@@ -28,7 +29,7 @@ class PopoutDemo extends HookedComponent {
         return (
             <div style={{ backgroundColor: "rgba(255,0,0,0.3)" }}>
                 You clicked {this.count} times!
-                <Popout.JSX w={100} h={100} style={{ backgroundColor: "lightgreen" }}>
+                <Popout w={100} h={100} style={{ backgroundColor: "lightgreen" }} Tag="div">
                     <button
                         onClick={() => {
                             this.count += 1;
@@ -36,7 +37,7 @@ class PopoutDemo extends HookedComponent {
                     >
                         CLICK ME!
                     </button>
-                </Popout.JSX>
+                </Popout>
             </div>
         );
     }
@@ -48,11 +49,20 @@ PopoutDemo.JSX = _JSXPopoutDemo;
 class ReduxDemo extends HookedComponent {
     private textFieldRef = React.createRef<HTMLInputElement>();
     public useRender() {
+        const bgcolour = useFormInput("yellow");
         return (
-            <div style={{ backgroundColor: "white", margin: 5 }}>
-                enter background colour:<input ref={this.textFieldRef}></input>
-                <button onClick={this.changeBackground}>Set bg</button>
-            </div>
+            <form
+                style={{ backgroundColor: "white", margin: 5 }}
+                onSubmit={e => {
+                    e.preventDefault();
+                    actions.changeBg(bgcolour.value);
+                }}
+                target="_none"
+            >
+                enter background colour:
+                <input {...bgcolour} />
+                <input type="submit" value="Submit" />
+            </form>
         );
     }
     private changeBackground = () => {

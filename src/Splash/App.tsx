@@ -1,11 +1,11 @@
 import React from "react";
 import logo from "./logo.svg";
 import "./App.css";
-import { HookedComponent } from "../lib/hooklib";
+import { HookCls } from "src/lib/hookcls";
 import { Main } from "../lib/reactUtil";
-type Props = {};
-export class App extends HookedComponent<Props> {
-    public useRender(props: Props) {
+
+class App extends HookCls {
+    public useRender() {
         return (
             <Main className="App">
                 <img src={logo} className="App-logo" alt="logo" />
@@ -23,8 +23,6 @@ export class App extends HookedComponent<Props> {
             </Main>
         );
     }
-    public static JSX: typeof _JSX;
 }
-const _JSX = App.finalize(App);
-App.JSX = _JSX;
-export default App.JSX;
+
+export default App.createComponent();

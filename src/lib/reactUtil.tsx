@@ -1,7 +1,7 @@
 import React from "react";
-import { Switch, Route, RouteComponentProps, useRouteMatch, Redirect } from "react-router";
+import { Switch, Route, useRouteMatch, Redirect } from "react-router";
 import { isA, ObjectEntries, ObjectKeys } from "./util";
-import { useGenEffect } from "./hooklib";
+import { useGenEffect } from "./hooks";
 import { Link } from "react-router-dom";
 
 function* withClassName<HTMLElem extends { classList: DOMTokenList } = HTMLElement>(
@@ -31,7 +31,7 @@ function parseOneStyle(selector: string, style: React.CSSProperties) {
 /** JSX component that resolves to a <style> tag, uses react syntax for styling. */
 export function Stylesheet({ styles }: StylesheetProps) {
     let code = ObjectEntries(styles)
-        .map(a => parseOneStyle(...a))
+        .map((a) => parseOneStyle(...a))
         .join("\n");
     return <style>{code}</style>;
 }
@@ -83,7 +83,7 @@ export function makeCompSwitch<K extends string>(paths: Record<K, Comp<{}>>) {
             return (
                 <Main className="index">
                     <ul>
-                        {ObjectKeys(paths).map(path => (
+                        {ObjectKeys(paths).map((path) => (
                             <li key={path}>
                                 <Link to={rootPath + path}>{trimSlashes(path)}</Link>
                             </li>
@@ -94,9 +94,7 @@ export function makeCompSwitch<K extends string>(paths: Record<K, Comp<{}>>) {
         };
         const fallback = <p>404 page not found</p>;
 
-        return !isProper ? (
-            <Redirect to={rootPath} />
-        ) : (
+        return (
             <Switch>
                 <Route path={rootPath} exact component={indexPage} />
                 {routes}
@@ -105,4 +103,25 @@ export function makeCompSwitch<K extends string>(paths: Record<K, Comp<{}>>) {
         );
     }
     return RouteSwitch;
+}
+
+/**
+ * mostly stolen from https://github.com/carloluis/use-media-query-hook/blob/master/index.js
+ */
+function useMediaQuery(queryString: string) {
+    const [queryMatch, dispatchUpdate] = React.useReducer(
+        (prev: boolean, e: MediaQueryList | MediaQueryListEvent) => e.matches,
+        undefined,
+        () => window.matchMedia(queryString).matches,
+    );
+    useGenEffect(updateQuery());
+    function* updateQuery() {
+        yield [queryString];
+        const e = window.matchMedia(queryString);
+        dispatchUpdate(e);
+        e.addListener(dispatchUpdate);
+        yield;
+        e.removeListener(dispatchUpdate);
+    }
+    return queryMatch;
 }
