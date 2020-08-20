@@ -1,5 +1,4 @@
 import React from "react";
-import { HookCls } from "./hookcls";
 
 import { geneffs, useGenEffect } from "./hooks";
 import { HookedComponent, statefulHookedComponent } from "./oldHookCls/hooklib1";
@@ -71,7 +70,7 @@ export class ClsComponent extends React.Component<Props, { loc: Point }> {
         window.removeEventListener("keypress", this.handleKey);
     }
     handleKey(ev: KeyboardEvent) {
-        this.setState(s => ({ loc: updatePos(s.loc, ev) }));
+        this.setState((s) => ({ loc: updatePos(s.loc, ev) }));
     }
 }
 
@@ -147,7 +146,7 @@ export class Counter extends statefulHookedComponent({ count: 0 })<{}> {
     // @HookedComponent.RenderAffecting
     public message = "hello ";
     private increment = () => {
-        this.updateState("count", count => count + 1);
+        this.updateState("count", (count) => count + 1);
     };
     handle = (ev: KeyboardEvent) => {
         this.message += " ";
@@ -170,7 +169,5 @@ export class Counter extends statefulHookedComponent({ count: 0 })<{}> {
             </button>
         );
     }
-    static JSX: typeof _JSX;
+    static JSX = HookedComponent.finalize(Counter);
 }
-const _JSX = HookedComponent.finalize(Counter);
-Counter.JSX = _JSX;

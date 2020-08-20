@@ -1,6 +1,6 @@
 import React from "react";
-import { Switch, Route, useRouteMatch, Redirect } from "react-router";
-import { isA, ObjectEntries, ObjectKeys } from "./util";
+import { Switch, Route, useRouteMatch } from "react-router";
+import { ObjectEntries, ObjectKeys } from "./util";
 import { useGenEffect } from "./hooks";
 import { Link } from "react-router-dom";
 
@@ -28,7 +28,7 @@ function parseOneStyle(selector: string, style: React.CSSProperties) {
     }
     return `${selector} {${code}}`;
 }
-/** JSX component that resolves to a <style> tag, uses react syntax for styling. */
+/** JSX component that resolves to a `<style>` tag, uses react syntax for styling. */
 export function Stylesheet({ styles }: StylesheetProps) {
     let code = ObjectEntries(styles)
         .map((a) => parseOneStyle(...a))
@@ -108,7 +108,7 @@ export function makeCompSwitch<K extends string>(paths: Record<K, Comp<{}>>) {
 /**
  * mostly stolen from https://github.com/carloluis/use-media-query-hook/blob/master/index.js
  */
-function useMediaQuery(queryString: string) {
+export function useMediaQuery(queryString: string) {
     const [queryMatch, dispatchUpdate] = React.useReducer(
         (prev: boolean, e: MediaQueryList | MediaQueryListEvent) => e.matches,
         undefined,

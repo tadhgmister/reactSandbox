@@ -2,7 +2,7 @@ import React from "react";
 import { HookCls } from "src/lib/hookcls";
 import { Main } from "src/lib/reactUtil";
 import { useIntermittentUpdate } from "src/lib/gameHelpers";
-import { Actor } from "./Actor";
+import { Actor, testContext } from "./Actor";
 /**
  * makes a callback that can take the time in ms since last time it was called and
  * will call the passed function in the given interval, the callback should return the time
@@ -30,7 +30,7 @@ const CANVAS_WIDTH = 200;
  */
 export class Game_Cls extends HookCls {
     @HookCls.RenderAffecting
-    private message = "not done";
+    private message = "blue";
     @HookCls.RenderAffecting
     public asteroids: Array<{ x: number; y: number; key: number }> = [{ x: 0, y: 100, key: 1 }];
     private stop_updating = false;
@@ -39,19 +39,21 @@ export class Game_Cls extends HookCls {
         useIntermittentUpdate(this.update);
         if (this.asteroids?.[0].x > 100) {
             this.stop_updating = true;
-            console.log("ASTER", this.asterref.current);
-            console.log("GAME", this);
-            this.message = "NOW DONE";
+            // console.log("ASTER", this.asterref.current);
+            // console.log("GAME", this);
+            this.message = "red";
         }
         return (
-            <Main className="Asteroids">
-                {this.message}
-                <svg width={CANVAS_WIDTH} height={200}>
-                    {this.asteroids.map(ast => (
-                        <Actor {...ast} ref={this.asterref} />
-                    ))}
-                </svg>
-            </Main>
+            <testContext.Provider value={this.message}>
+                <Main className="Asteroids">
+                    {this.message}
+                    <svg width={CANVAS_WIDTH} height={200}>
+                        {this.asteroids.map((ast) => (
+                            <Actor {...ast} ref={this.asterref} />
+                        ))}
+                    </svg>
+                </Main>
+            </testContext.Provider>
         );
     }
     private update = (time: number) => {

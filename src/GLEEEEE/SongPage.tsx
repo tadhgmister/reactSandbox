@@ -3,9 +3,8 @@ import React from "react";
 import { Main } from "src/lib/reactUtil";
 import { fetchFolderContent } from "src/lib/util";
 import { HookComp } from "src/lib/oldHookCls/hooklib2";
-import { Link } from "react-router-dom";
 function isValidAudio(filename: string) {
-    return [".mp3", ".m4a", ".wav"].some(ext => filename.endsWith(ext));
+    return [".mp3", ".m4a", ".wav"].some((ext) => filename.endsWith(ext));
 }
 export class SongPage extends HookComp {
     @HookComp.RenderAffecting
@@ -21,7 +20,7 @@ export class SongPage extends HookComp {
     }
     async fetchFiles() {
         const files = await fetchFolderContent(this.rootFolder);
-        this.lyricsFile = files.find(file => file.endsWith(".pdf"));
+        this.lyricsFile = files.find((file) => file.endsWith(".pdf"));
 
         this.audioFiles = files.filter(isValidAudio);
     }
@@ -30,7 +29,7 @@ export class SongPage extends HookComp {
         return (
             <Main className="flex-row SongPage">
                 <aside className="music-list">
-                    {this.audioFiles.map(file => (
+                    {this.audioFiles.map((file) => (
                         <React.Fragment key={file}>
                             <p>
                                 <a

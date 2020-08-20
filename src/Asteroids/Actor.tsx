@@ -1,5 +1,7 @@
 import React from "react";
 import { HookCls } from "src/lib/hookcls";
+
+export const testContext = React.createContext("red");
 /** all props for Actor */
 interface Actor_AllProps extends Actor_DefProps {
     /** x coordinate of the circle */
@@ -20,8 +22,19 @@ class Actor_DefProps {
 export class Actor_Cls extends HookCls<Actor_AllProps> {
     public static displayName = "Asteroid";
     public static defaultProps = new Actor_DefProps();
+
+    @HookCls.HookInit
+    private stroke = React.useContext(testContext);
     protected useRender(props: Actor_AllProps) {
-        return <circle cx={props.x} cy={props.y} fill={props.colour} r={props.size} />;
+        return (
+            <circle
+                cx={props.x}
+                cy={props.y}
+                fill={props.colour}
+                r={props.size}
+                stroke={this.stroke}
+            />
+        );
     }
 }
 /**

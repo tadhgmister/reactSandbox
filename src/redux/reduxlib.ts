@@ -40,6 +40,9 @@ export class ReduxState {
     public [UPDATE](updates: Partial<this>) {
         const newFields = ObjectEntries(updates, isDefined);
         if (newFields.length === 0) return;
+        // it's possible some assignments will fail if there are get/set properties.
+        // we could put the `this[k] = v` in a try to avoid inconsistent update but that
+        // seems so unlikely a case, and it's not clear what should be done with the error
         this[INTERNAL].hasChanged = true;
         for (const [k, v] of newFields) {
             this[k] = v;
@@ -64,8 +67,11 @@ type ExampleState = {
  */
 function makeReducer<S extends Record<string, ReduxState>>(stateObject: S) {
     return function reducer(state: S = stateObject, { type, data }: UpdateAction<S>): S {
-        if(type !== "UPDATE"){
-            console.warn("got unrecognized redux action:", type)
+        if (type !== "UPDATE") {
+            if (!(type as string).includes("INIT")) {
+                // allow the redux init action,
+                console.warn("got unrecognized redux action:", type);
+            }
             return state;
         }
         for (const [k, v] of ObjectEntries(data, isDefined)) {
@@ -82,6 +88,13 @@ export class StoreHelpers<S extends Record<string, ReduxState>> {
     constructor(state: S) {
         this.store = redux.createStore(makeReducer(state));
     }
+    /**
+     * NOT FULLY IMPLEMENTED
+     * intent is to mirror something like Act I designed for EIP but need more consideration,
+     * with the non-copying design there isn't a nice way to revert in the middle of a async callback if it throws an error.
+     * @deprecated see full note, not implemented correctly and deprecated is best way to label use as issue.
+     * @param callback
+     */
     public Act<P extends any[], R>(callback: (dispatch: any, getState: () => S, ...args: P) => R) {
         return (...args: P): R => {
             const alreadyUpdating = this.midUpdate;
@@ -117,29 +130,33 @@ export class StoreHelpers<S extends Record<string, ReduxState>> {
             }
         });
     }
-    public useState<T>(getFields: (state: S)=>T): T{
+    public useState<T>(getFields: (state: S) => T): T {
         // need to create a proxy of S to pass into the getFields,
         // then proxy will track which fields were accessed and add a notifier to each one
-        const trigger_update = React.useReducer((n)=>n+1, 0)[1];
-        const to_unregister: Array<{delete(a:typeof trigger_update):void}> = [];
-        const {proxy, revoke} = Proxy.revocable(this.getState(), {
-            get(state, field: keyof S){
+        const trigger_update = React.useReducer((n) => n + 1, 0)[1];
+        const to_unregister: Array<{ delete(a: typeof trigger_update): void }> = [];
+        const { proxy, revoke } = Proxy.revocable(this.getState(), {
+            get(state, field: keyof S) {
                 const result = state[field];
-                if(result instanceof ReduxState){
-                    result[INTERNAL].dependents.add(trigger_update)
-                    to_unregister.push(result[INTERNAL].dependents)
+                if (result instanceof ReduxState) {
+                    result[INTERNAL].dependents.add(trigger_update);
+                    to_unregister.push(result[INTERNAL].dependents);
                 }
                 return result;
-            }
-        })
+            },
+        });
         const result = getFields(proxy);
         revoke();
-        React.useEffect(()=>()=>{
-            for(const set of to_unregister){
-                set.delete(trigger_update)
-            }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        }, to_unregister)
+        // cleanup only, actual computation is done syncronously with getFields(proxy)
+        React.useEffect(
+            () => () => {
+                for (const set of to_unregister) {
+                    set.delete(trigger_update);
+                }
+            },
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+            to_unregister,
+        );
         return result;
     }
     /**
@@ -148,13 +165,12 @@ export class StoreHelpers<S extends Record<string, ReduxState>> {
      * @param k section in state to update
      * @param f field of that section to update
      */
-    public makeAction<K extends keyof S, F extends keyof S[K]>(k: K, f: F){
-        return (newVal?: S[K][F])=>{
-            this.update({[k]:{[f]: newVal}} as any)
-        }
+    public makeAction<K extends keyof S, F extends keyof S[K]>(k: K, f: F) {
+        return (newVal?: S[K][F]) => {
+            this.update({ [k]: { [f]: newVal } } as any);
+        };
     }
 }
-
 
 //////////////////////// OLD CODE
 //////////////////// Might still be applicable, not sure.

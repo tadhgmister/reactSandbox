@@ -33,6 +33,10 @@ interface PrivateHookClsProto<P> extends HookCls<P> {
      */
     _renderAffectingFields: (keyof any)[];
     /**
+     * fields that are initialized with a hook, meaning they need to be called every render
+     */
+    _hookInitInitHooks: Record<keyof any, () => any>;
+    /**
      * THIS ONLY EXISTS ON PROTOTYPES
      * when some fields in the subclass are labeled with RenderAffecting then
      * this is defined on the prototype to be a proxy handle to trigger updates.
@@ -87,6 +91,14 @@ export abstract class HookCls<P = {}> {
     protected [HOC_RENDER](props: P) {
         // force update just needs to make a new object by identity each time.
         this._force_update = React.useReducer(() => ({}), this)[1];
+        const hooks = ((this as unknown) as PrivateHookClsProto<P>)._hookInitInitHooks;
+        const innerFields = this._hookInitManagedFields;
+        // this calls all hooks that were initialized by using HookInit
+        for (const field in hooks) {
+            if (hooks.hasOwnProperty(field)) {
+                innerFields[field] = hooks[field]();
+            }
+        }
         return <this._COMP {...props} />;
     }
     /**
@@ -129,21 +141,52 @@ export abstract class HookCls<P = {}> {
             proto._proxyHandle = {
                 set(target, field: keyof typeof target, value, rec) {
                     const do_update = renFields.includes(field) && value !== target[field];
-                    const result = Reflect.set(target, field, value, rec);
-                    if (do_update) {
+                    const success = Reflect.set(target, field, value, rec);
+                    if (success && do_update) {
                         target._force_update();
                     }
-                    return result;
+                    return success;
                 },
             };
         }
         proto._renderAffectingFields.push(field);
     }
+    private _hookInitManagedFields: Record<any, any> = {};
+    /**
+     * highly experimental decorator for properties which are just result of a hook call every render.
+     * this is using legacy decorator stuff that isn't even type safe so browser compatibility is completely con
+     */
+    protected static HookInit(
+        _proto: HookCls<any>,
+        field: keyof any,
+        desc?: PropertyDescriptor & { initializer?: () => any },
+    ) {
+        const proto = _proto as PrivateHookClsProto<any>;
+        if (desc?.initializer === undefined) {
+            throw new Error("HookInit only works when descriptor has initializer property");
+        }
+        // this is some kind of hook call that needs to be called every render
+        // we need to return a new decorator that just reads an internal value
+        const hookToCall = desc.initializer;
+        // if this is the first HookInit property we need to create the new mapping on this prototype
+        if (!proto.hasOwnProperty("_HookInitFields")) {
+            // copy any that might exist in super class so multiple subclasses don't break
+            proto._hookInitInitHooks = { ...proto._hookInitInitHooks };
+        }
+        proto._hookInitInitHooks[field as any] = hookToCall;
+        const newDesc: PropertyDescriptor = {
+            enumerable: desc.enumerable,
+            configurable: desc.configurable,
+            get(this: HookCls<any>) {
+                return this._hookInitManagedFields[field as any];
+            },
+        };
+        return newDesc as any; // typescript forces descriptors to return void or any.
+    }
     ////// STATEFUL REDUCERS
     /**
      * creates a subclass of HookCls with extra fields automatically generated
      * based on mapping passed.
-     * Note that the fields
      * @param map mapping of values and reducers
      */
     public static WithReducers<P, A>(
@@ -152,6 +195,8 @@ export abstract class HookCls<P = {}> {
     ) {
         type Updaters = UnionToIntersection<{ [K in keyof A]: ExtractUpdaters<A[K]> }[keyof A]>;
         type AddedFields = P & Updaters;
+        // this doesn't freeze the reducer maps as well, this is just to ensure that the fields that need
+        // to call hooks every render cannot change at runtime.
         const map = Object.freeze(stateAndReducerSpec);
         abstract class Wrapped<Props = {}> extends this<Props> {
             private _reducer_store = {} as P; // constructor fills in the values.
@@ -174,7 +219,7 @@ export abstract class HookCls<P = {}> {
                         self[updaterName as keyof Updaters] = (((...args: never[]) => {
                             const dispatch = this._reducer_updaters[field as keyof P];
                             if (dispatch !== undefined) {
-                                dispatch(v => updater(v as any, ...args) as P[keyof P]);
+                                dispatch((v) => updater(v as any, ...args) as P[keyof P]);
                             } else {
                                 // called updater before first render (almost certainly in the constructor)
                                 // technically we could just override _reducer_store field directly but
@@ -188,6 +233,7 @@ export abstract class HookCls<P = {}> {
             protected [HOC_RENDER](props: Props) {
                 const s = this._reducer_store;
                 const u = this._reducer_updaters;
+                // this is safe for rules of hooks since map is frozen above.
                 for (const field of ObjectKeys(map) as (keyof P)[]) {
                     // eslint-disable-next-line react-hooks/rules-of-hooks
                     [s[field], u[field]] = React.useState(s[field]);
@@ -210,10 +256,9 @@ export abstract class HookCls<P = {}> {
 }
 // _renderAffectingFields will always have some elements, simplifies logic inside a little
 (HookCls.prototype as PrivateHookClsProto<any>)._renderAffectingFields = [];
+(HookCls.prototype as PrivateHookClsProto<any>)._hookInitInitHooks = {};
 
-type UnionToIntersection<U> = (U extends any
-  ? (k: U) => void
-  : never) extends (k: infer I) => void
+type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void
     ? I
     : never;
 
@@ -253,5 +298,33 @@ type ExtractUpdaters<A> = A extends { updaters: infer U }
 //                 <button onClick={this.decrement}>-</button>
 //             </div>
 //         );
+//     }
+// }
+
+/*
+USE CASE NEEDED:
+frequently it is wanted for a class field to just be the return of a hook, called each render and is read only everwhere else
+it would be desirable for these to be called in the HOC part but not necessary.
+the point is that the type should be infered from the hook call but the only way for a property declaration to infer is to 
+infer the initial value (one set in constructor) and we really dont want to be calling hooks in constructor.
+
+Method 1:
+- have a method like "useHooks" which returns an object which is set as object property?
+- only way to easily refer to the return type is to have the function outside class :(
+Method 2:
+- have some special wrapper syntax like WithReducers (which I don't like very much)]
+- would pass function which returns fields to put on object by calling hooks
+- issue is that rules of hooks makes it annoying to still check that the function is written correctly since it's an arrow
+Method 3:
+- use black magic to make a decorator that re-calls the initializer of a property every render
+  so that the constructor can do useContext or what ever and those properties will just work
+- don't like this at all, very iffy with browser compatibility and rules of hooks get funky.
+*/
+// const testContext = React.createContext({ v: "hello" });
+// class TestComp extends HookCls {
+//     @HookCls.HookInit
+//     a = React.useContext(testContext);
+//     useRender() {
+//         return null;
 //     }
 // }

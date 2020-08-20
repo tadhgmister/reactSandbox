@@ -92,9 +92,6 @@ export const geneffs = {
     },
 };
 
-function inputReducer(v: any, ev: React.ChangeEvent<HTMLInputElement>) {
-    return ev.target.value;
-}
 /**
  * returns {value, onChange} object which can be passed as props to an input tag.
  * ```typescript
@@ -107,7 +104,14 @@ function inputReducer(v: any, ev: React.ChangeEvent<HTMLInputElement>) {
  * ```
  */
 export function useFormInput(initialValue: string) {
-    const [value, onChange] = React.useReducer(inputReducer, initialValue);
+    const [value, change] = React.useState(initialValue);
+    // initial implementation using useReducer to read the event is broken since React is now using
+    // synthetic events which get cleared by the time the reducer actually gets called so now we
+    // need to cache the function ourselves :(
+    const onChange = React.useCallback(
+        (ev: React.ChangeEvent<HTMLInputElement>) => change(ev.target.value),
+        [change],
+    );
     return { value, onChange };
 }
 
