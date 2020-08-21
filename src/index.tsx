@@ -10,6 +10,7 @@ const Routes = makeCompSwitch({
     "demos/": React.lazy(() => import("./Demos/demos")),
     "asteroids/": React.lazy(() => import("./Asteroids/Game")),
     "gleemusic/": React.lazy(() => import("./GLEEEEE/HOOOOME")),
+    "match game/": React.lazy(() => import("./Match3/MatchGame")),
 });
 
 function Nav() {
@@ -30,6 +31,10 @@ function Nav() {
         document.getElementById("topbar")!,
     );
 }
+/**
+ * due to the occasional error inside react so that we don't get popup (input tag should not have any text inside)
+ * this will catch any errors and give a clean way to reload the current page without too much hassle.
+ */
 class ErrorCatch extends React.Component<{}, { err: Error | null }> {
     state: { err: Error | null } = { err: null };
     componentDidCatch(err: Error) {
