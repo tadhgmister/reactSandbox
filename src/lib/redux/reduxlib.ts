@@ -1,6 +1,6 @@
 import * as redux from "redux";
 import React from "react";
-import { ObjectEntries, isDefined } from "../lib/util";
+import { ObjectEntries, isDefined } from "../util";
 import ReactDOM from "react-dom";
 
 //// NOTE: initially this will be designed to only take ReduxStore objects into the state

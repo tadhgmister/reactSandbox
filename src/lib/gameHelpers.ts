@@ -1,5 +1,5 @@
 import React from "react";
-import { ObjectEntries, waitUntilIdle } from "./util";
+import { ObjectEntries, waitUntilIdle, wait } from "./util";
 import { useGenEffect } from "./hooks";
 // import { useGenEffect } from "./hooklib";
 // import { waitUntilIdle } from "./util";
@@ -52,13 +52,13 @@ interface ObjectWithCollision {
 /**
  * given a list of objects, this yields pairs [a,b] that might collide.
  * it is still up to you to actually check if they do collide but this narrows the possible list down from all pairs
- *
+ * using a simple binning algorithm.
  * @param objs list of objects to check collision
  * @param maxr maximum radius of all objects, if not given is just calculated from list
  */
 export function* possibleCollisions<T extends ObjectWithCollision>(objs: T[], maxr?: number) {
     if (maxr === undefined) {
-        maxr = Math.max(...objs.map(v => v.r));
+        maxr = Math.max(...objs.map((v) => v.r));
     }
     function* adjacency(key: string) {
         //  A  B  C
@@ -123,7 +123,11 @@ export function useIntermittentUpdate(callback: (msSinceLastCall: number) => voi
         let b = 0;
         while (ref.current !== undefined) {
             const [callback, timeout] = ref.current;
-            await waitUntilIdle!(timeout);
+            if (waitUntilIdle) {
+                await waitUntilIdle(timeout);
+            } else {
+                await wait(timeout);
+            }
             [a, b] = [performance.now(), a];
             callback(a - b);
         }

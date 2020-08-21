@@ -2,8 +2,8 @@ import React from "react";
 import { HookedComponent } from "src/lib/oldHookCls/hooklib1";
 import { Popout } from "src/lib/Popout";
 import { Main } from "src/lib/reactUtil";
-import store from "src/redux";
-import * as actions from "src/redux/actions";
+import store from "src/lib/redux";
+import * as actions from "src/lib/redux/actions";
 import { useFormInput } from "src/lib/hooks";
 export class Demos extends HookedComponent {
     public useRender() {
@@ -48,12 +48,13 @@ PopoutDemo.JSX = _JSXPopoutDemo;
 
 class ReduxDemo extends HookedComponent {
     private textFieldRef = React.createRef<HTMLInputElement>();
+
     public useRender() {
         const bgcolour = useFormInput("yellow");
         return (
             <form
                 style={{ backgroundColor: "white", margin: 5 }}
-                onSubmit={e => {
+                onSubmit={(e) => {
                     e.preventDefault();
                     actions.changeBg(bgcolour.value);
                 }}

@@ -1,20 +1,14 @@
-type NeverKeys<T> = { [K in keyof T]: [T[K]] extends [never] ? K : never }[keyof T];
-type OmitNeverKeys<T> = Omit<T, NeverKeys<T>>;
+export default null;
+// export interface MyObjects {
+//     A: string
+//     B: string
+//     C: string
+//     }
+// declare const myObject: MyObjects;
 
-type A<T> = OmitNeverKeys<{
-    n: T extends number ? number : never;
-    s: T extends string ? string : never;
-}>;
-const a: A<string> = {
-    s: "blah",
-};
-enum Mutability {
-    ENABLED,
-    DISABLED,
-}
+// declare const el: {feature: string}
 
-interface Demo<HasRules extends boolean> {
-    rules: HasRules extends true ? string : undefined;
-}
-
-const x: Demo<false> = { rules: "" };
+// const objKeys = Object.keys(myObject);
+// if (objKeys.includes(el.feature)) {
+//     myObject[el.feature as keyof typeof myObject] = formInputField.value;
+// }

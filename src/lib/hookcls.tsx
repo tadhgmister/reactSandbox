@@ -57,13 +57,16 @@ export abstract class HookCls<P = {}> {
     protected abstract useRender(props: P): React.ReactElement<any, any> | null;
 
     constructor() {
+        // COMP needs to bind to the proxy if we use a proxy, otherwise RenderAffecting is nearly useless
+        let _this = this;
         this._COMP = (props: P) => {
-            return this.useRender(props);
+            return _this.useRender(props);
         };
         this._COMP.displayName = new.target.displayName ?? new.target.name;
         const _proxyHandle = ((this as unknown) as PrivateHookClsProto<P>)._proxyHandle;
         if (_proxyHandle !== undefined) {
-            return new Proxy(this, _proxyHandle);
+            _this = new Proxy(this, _proxyHandle);
+            return _this;
         }
     }
     /** internal rendering function component. see description on this[HOC_RENDER] for more info */
