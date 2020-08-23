@@ -6,14 +6,13 @@ interface Tile_AllProps extends React.PropsWithChildren<Tile_DefProps> {
     x: number;
     y: number;
     del: (x: number, y: number) => void;
-} // required props go in here.
-/** props defined with default values. */
-class Tile_DefProps {
-    // props with default values here. remember to document all props
 }
+/** props defined with default values. */
+class Tile_DefProps {}
 
 /**
- * TODO: DESCRIBE CLASS HERE
+ * this is a tile in the match 3 game, mostly deals with nice dropping animation,
+ * all program logic is handled in MatchGame
  */
 export class Tile_Cls extends HookCls<Tile_AllProps> {
     public static defaultProps = new Tile_DefProps();
@@ -23,6 +22,7 @@ export class Tile_Cls extends HookCls<Tile_AllProps> {
     protected useRender(props: Tile_AllProps) {
         if (this.prev_y !== props.y) {
             this.falling = true;
+            this.prev_y = props.y;
         }
         return (
             <div

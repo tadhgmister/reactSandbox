@@ -1,0 +1,85 @@
+{
+    // Place your sandbox workspace snippets here. Each snippet is defined under a snippet name and has a scope, prefix, body and
+    // description. Add comma separated ids of the languages where the snippet is applicable in the scope field. If scope
+    // is left empty or omitted, the snippet gets applied to all languages. The prefix is what is
+    // used to trigger the snippet and the body will be expanded and inserted. Possible variables are:
+    // $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders.
+    // Placeholders with the same ids are connected.
+    // Example:
+    // "Print to console": {
+    // 	"scope": "javascript,typescript",
+    // 	"prefix": "log",
+    // 	"body": [
+    // 		"console.log('$1');",
+    // 		"$2"
+    // 	],
+    // 	"description": "Log output to console"
+    // }
+    "HookClsFile": {
+        "scope": "typescriptreact",
+        "prefix": ["hookcls", "*hookcls"],
+        "description": "whole file for a HookCls component",
+        "body": [
+            "import React from \"react\";",
+            "import {HookCls} from \"src/lib/hookcls\"",
+            "/** all props for ${1:$TM_FILENAME_BASE} */",
+            "interface $1_AllProps extends React.PropsWithChildren<$1_DefProps> {} // required props go in here.",
+            "/** props defined with default values. */",
+            "class $1_DefProps {",
+            "    ${3:// props with default values here. remember to document all props}",
+            "}",
+            "/**",
+            " * ${2:TODO DESCRIBE CLASS}",
+            " */",
+            "export class $1_Cls extends HookCls<$1_AllProps> {",
+            "    public static defaultProps = new $1_DefProps()",
+            "    protected useRender(props: $1_AllProps) {",
+            "        return (${0:<>{props.children\\}</>});",
+            "    }",
+            "}",
+            "/**",
+            " * react component to implement $1_Cls hook class.",
+            " * @see $1_Cls for full details",
+            " */",
+            "export const $1 = $1_Cls.createComponent();",
+            "/** type is an alias to $1_Cls so that importing react component also imports ref type */",
+            "export type $1 = $1_Cls",
+            "export default $1",
+            "/** props for $1 taking into account default props being optional */",
+            "export type $1Props = Omit<$1_AllProps, keyof $1_DefProps> & Partial<$1_AllProps>;",
+            ""
+        ]
+    },
+    "HookClsFileMain": {
+        "scope": "typescriptreact",
+        "prefix": ["hookcls_main", "*hookcls_main"],
+        "description": "file template for main component, note that it is assumed there is a css module file for the component as well",
+        "body": [
+            "import React from \"react\";",
+            "import {HookCls} from \"src/lib/hookcls\"",
+            "import { Main } from \"src/lib/reactUtil\";",
+            "import styles from \"./${1:$TM_FILENAME_BASE}.module.css",
+            "/**",
+            " * ${2:TODO DESCRIBE CLASS}",
+            " */",
+            "export class $1_Cls extends HookCls {",
+            "    protected useRender() {",
+            "        return (",
+            "            <Main className={styles.$1}>",
+            "                ${0: CONTENT HERE}",
+            "            </Main>",
+            "        );",
+            "    }",
+            "}",
+            "/**",
+            " * react component to implement $1_Cls hook class.",
+            " * @see $1_Cls for full details",
+            " */",
+            "export const $1 = $1_Cls.createComponent();",
+            "/** type is an alias to $1_Cls so that importing react component also imports ref type */",
+            "export type $1 = $1_Cls",
+            "export default $1",
+            ""
+        ]
+    }
+}
