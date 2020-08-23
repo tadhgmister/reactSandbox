@@ -46,8 +46,8 @@ declare global {
  */
 export const waitUntilIdle = window.requestIdleCallback === undefined ? undefined : _waitUntilIdle;
 function _waitUntilIdle(timeout?: number) {
-    return new Promise<void>(resolve => {
-        window.requestIdleCallback!(info => resolve(), { timeout });
+    return new Promise<void>((resolve) => {
+        window.requestIdleCallback!((info) => resolve(), { timeout });
     });
 }
 /**
@@ -55,7 +55,7 @@ function _waitUntilIdle(timeout?: number) {
  * @param timeout time in milliseconds to wait
  */
 export function wait(timeout: number) {
-    return new Promise<void>(resolve => window.setTimeout(resolve, timeout));
+    return new Promise<void>((resolve) => window.setTimeout(resolve, timeout));
 }
 interface MainTypes {
     string: string;
@@ -84,22 +84,22 @@ export function isA<T, K extends keyof MainTypes>(
  * @param obj any object
  */
 export function ObjectKeys<T>(obj: T) {
-    return Object.keys(obj) as (keyof T)[];
+    return Object.keys(obj) as (string & keyof T)[];
 }
 /**
  * alias to Object.entries but types as [keyof T, T[keyof T]] which is more useful.
  * @param obj any object
  * @param predicate function to filter the values to only a subset.
  */
-export function ObjectEntries<T, V extends T[keyof T] = T[keyof T]>(
+export function ObjectEntries<T, V extends T[string & keyof T] = T[string & keyof T]>(
     obj: T,
-    predicate?: (v: T[keyof T]) => v is V,
+    predicate?: (v: T[string & keyof T]) => v is V,
 ) {
     let entries = Object.entries(obj);
     if (predicate !== undefined) {
         entries = entries.filter(([k, v]) => predicate(v));
     }
-    return entries as Array<[keyof T, V]>;
+    return entries as Array<[string & keyof T, V]>;
 }
 /**
  * returns true if object is not undefined

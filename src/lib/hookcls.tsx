@@ -124,7 +124,12 @@ export abstract class HookCls<P = {}> {
         });
         comp.displayName = `HookCls(${this.displayName ?? this.name})`;
         comp.defaultProps = this.defaultProps;
-        return comp as typeof comp & { defaultProps: DP };
+        // using typeof comp & {defaultProps: DP} leaves the Partial<P> for default props from forward ref component
+        // which breaks the whole default props system, instead we will just explicitly give type that doesn't behave badly.
+        // if typescript JSX had a better way to handle props this wouldn't be as complicated...
+        return comp as React.NamedExoticComponent<P & React.RefAttributes<Inst>> & {
+            defaultProps: DP;
+        };
     }
     /// RENDER AFFECTING
 

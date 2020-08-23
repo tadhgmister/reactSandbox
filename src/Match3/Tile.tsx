@@ -91,7 +91,11 @@
 import React from "react";
 import { HookCls } from "src/lib/hookcls";
 /** all props for Tile */
-interface Tile_AllProps extends React.PropsWithChildren<Tile_DefProps> {} // required props go in here.
+interface Tile_AllProps extends React.PropsWithChildren<Tile_DefProps> {
+    x: number;
+    y: number;
+    del: (x: number, y: number) => void;
+} // required props go in here.
 /** props defined with default values. */
 class Tile_DefProps {
     // props with default values here. remember to document all props
@@ -103,12 +107,19 @@ class Tile_DefProps {
 export class Tile_Cls extends HookCls<Tile_AllProps> {
     public static defaultProps = new Tile_DefProps();
     @HookCls.RenderAffecting
-    private falling: boolean = false;
+    private falling = false;
+    private prev_y = -1;
     protected useRender(props: Tile_AllProps) {
+        if (this.prev_y !== props.y) {
+            this.falling = true;
+        }
         return (
             <div
                 onClick={() => {
-                    this.falling = true;
+                    props.del(props.x, props.y);
+                }}
+                onAnimationEnd={() => {
+                    this.falling = false;
                 }}
                 style={this.style}
             >
@@ -117,9 +128,8 @@ export class Tile_Cls extends HookCls<Tile_AllProps> {
         );
     }
     get style(): React.CSSProperties {
-        console.log("getting style");
         if (this.falling) {
-            return { animationName: "drop", animationDuration: "1s" };
+            return { animationName: "drop1", animationDuration: "1s" };
         } else {
             return {};
         }

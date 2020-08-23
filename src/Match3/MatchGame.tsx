@@ -9,15 +9,61 @@ interface MatchGame_AllProps extends React.PropsWithChildren<MatchGame_DefProps>
 class MatchGame_DefProps {
     // props with default values here. remember to document all props
 }
+interface TileInfo {
+    content: string;
+    id: number;
+}
+/**
+ * number of elements in grid, note that the css `grid-template-columns`
+ * needs to match up with this for anything to work properly.
+ */
+const GRID_SIZE = 8;
 /**
  * TODO: DESCRIBE CLASS HERE
  */
 export class MatchGame_Cls extends HookCls<MatchGame_AllProps> {
     public static defaultProps = new MatchGame_DefProps();
+    /**
+     * this is render affecting but since we just modify in place we will call _force_update()
+     * instead of re-writing the list.
+     */
+    private tiles: TileInfo[][];
+    private nextId = 0;
+    constructor() {
+        super();
+        this.tiles = [];
+        for (let i = 0; i < GRID_SIZE; i += 1) {
+            const column: TileInfo[] = [];
+            for (let j = 0; j < GRID_SIZE; j += 1) {
+                column.push(this.newTile());
+            }
+            this.tiles.push(column);
+        }
+    }
     protected useRender(props: MatchGame_AllProps) {
-        const tiles = [..."abcdefg"].map((letter) => <Tile key={letter}>{letter}</Tile>);
-        // can call hooks here. fill in rendering.
-        return <Main className="match3">{tiles}</Main>;
+        return <Main className="match3">{[...this.renderTiles()]}</Main>;
+    }
+    private newTile(): TileInfo {
+        const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        const c = characters.charAt(Math.floor(Math.random() * characters.length));
+        return { content: c, id: this.nextId++ };
+    }
+    private deleteTile = (x: number, y: number) => {
+        this.tiles[x].splice(y, 1);
+        this.tiles[x].push(this.newTile());
+        this._force_update();
+    };
+    protected *renderTiles() {
+        for (let j = GRID_SIZE - 1; j >= 0; j -= 1) {
+            for (let i = 0; i < GRID_SIZE; i += 1) {
+                const { content, id } = this.tiles[i][j];
+                yield (
+                    <Tile key={id} del={this.deleteTile} x={i} y={j}>
+                        {content}
+                    </Tile>
+                );
+            }
+        }
     }
 }
 /**
