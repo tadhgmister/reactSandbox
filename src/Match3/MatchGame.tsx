@@ -1,7 +1,7 @@
 import React from "react";
 import { HookCls } from "src/lib/hookcls";
 import { Main } from "src/lib/reactUtil";
-import "./Match3.css";
+import styles from "./Match3.module.css";
 import Tile from "./Tile";
 /** all props for MatchGame */
 interface MatchGame_AllProps extends React.PropsWithChildren<MatchGame_DefProps> {} // required props go in here.
@@ -41,7 +41,7 @@ export class MatchGame_Cls extends HookCls<MatchGame_AllProps> {
         }
     }
     protected useRender(props: MatchGame_AllProps) {
-        return <Main className="match3">{[...this.renderTiles()]}</Main>;
+        return <Main className={styles.match3}>{[...this.renderTiles()]}</Main>;
     }
     private newTile(): TileInfo {
         const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
