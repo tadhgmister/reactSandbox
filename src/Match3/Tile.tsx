@@ -1,5 +1,6 @@
 import React from "react";
 import { HookCls } from "src/lib/hookcls";
+import styles from "./Match3.module.css";
 /** all props for Tile */
 interface Tile_AllProps extends React.PropsWithChildren<Tile_DefProps> {
     x: number;
@@ -39,7 +40,7 @@ export class Tile_Cls extends HookCls<Tile_AllProps> {
     }
     get style(): React.CSSProperties {
         if (this.falling) {
-            return { animationName: "drop1", animationDuration: "1s" };
+            return { animationName: styles.drop1, animationDuration: "1s" };
         } else {
             return {};
         }
