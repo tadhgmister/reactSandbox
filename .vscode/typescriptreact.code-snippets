@@ -66,6 +66,7 @@
             "    protected useRender() {",
             "        return (",
             "            <Main className={styles.$1}>",
+            "                {/* comment to keep prettier from removing parenthases */}",
             "                ${0:CONTENT HERE}",
             "            </Main>",
             "        );",
