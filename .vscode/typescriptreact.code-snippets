@@ -21,7 +21,7 @@
         "description": "whole file for a HookCls component",
         "body": [
             "import React from \"react\";",
-            "import {HookCls} from \"src/lib/hookcls\"",
+            "import { HookCls } from \"src/lib/hookcls\";",
             "/** all props for ${1:$TM_FILENAME_BASE} */",
             "interface $1_AllProps extends React.PropsWithChildren<$1_DefProps> {} // required props go in here.",
             "/** props defined with default values. */",
@@ -32,7 +32,7 @@
             " * ${2:TODO DESCRIBE CLASS}",
             " */",
             "export class $1_Cls extends HookCls<$1_AllProps> {",
-            "    public static defaultProps = new $1_DefProps()",
+            "    public static defaultProps = new $1_DefProps();",
             "    protected useRender(props: $1_AllProps) {",
             "        return (${0:<>{props.children\\}</>});",
             "    }",
@@ -43,8 +43,8 @@
             " */",
             "export const $1 = $1_Cls.createComponent();",
             "/** type is an alias to $1_Cls so that importing react component also imports ref type */",
-            "export type $1 = $1_Cls",
-            "export default $1",
+            "export type $1 = $1_Cls;",
+            "export default $1;",
             "/** props for $1 taking into account default props being optional */",
             "export type $1Props = Omit<$1_AllProps, keyof $1_DefProps> & Partial<$1_AllProps>;",
             ""
@@ -56,7 +56,7 @@
         "description": "file template for main component, note that it is assumed there is a css module file for the component as well",
         "body": [
             "import React from \"react\";",
-            "import {HookCls} from \"src/lib/hookcls\"",
+            "import { HookCls } from \"src/lib/hookcls\";",
             "import { Main } from \"src/lib/reactUtil\";",
             "import styles from \"./${1:$TM_FILENAME_BASE}.module.css\";",
             "/**",
@@ -78,8 +78,8 @@
             " */",
             "export const $1 = $1_Cls.createComponent();",
             "/** type is an alias to $1_Cls so that importing react component also imports ref type */",
-            "export type $1 = $1_Cls",
-            "export default $1",
+            "export type $1 = $1_Cls;",
+            "export default $1;",
             ""
         ]
     }
