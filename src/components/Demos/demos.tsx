@@ -2,8 +2,8 @@ import React from "react";
 import { HookedComponent } from "src/lib/oldHookCls/hooklib1";
 import { Popout } from "src/lib/Popout";
 import { Main } from "src/lib/reactUtil";
-import store from "src/redux";
-import * as actions from "src/redux/actions";
+import store from "src/globalState";
+import * as actions from "src/globalState/actions";
 import { useFormInput } from "src/lib/hooks";
 export class Demos extends HookedComponent {
     public useRender() {
