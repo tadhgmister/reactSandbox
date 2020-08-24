@@ -1,7 +1,7 @@
 import React from "react";
 import * as api from "src/api";
 import { HookCls } from "src/lib/hookcls";
-import { Main, makeCompSwitch, Unrenderable } from "src/lib/reactUtil";
+import { Main, makeCompSwitch, Unrenderable, IndexPage } from "src/lib/reactUtil";
 import styles from "./Glee.module.css";
 
 /**
@@ -20,18 +20,14 @@ import styles from "./Glee.module.css";
  */
 export class SongIndex_Cls extends HookCls {
     @HookCls.RenderAffecting
-    private songlist?: React.ComponentType;
+    private songlist?: string[];
     @HookCls.RenderAffecting
     private error = null;
     constructor() {
         super();
         void api.fetchFolderContent("gleemusic").then(
             (songs) => {
-                const map = {} as Record<string, React.ComponentType<{}>>;
-                for (const song of songs) {
-                    map[song] = () => <p>{song}</p>;
-                }
-                this.songlist = makeCompSwitch(map);
+                this.songlist = songs;
             },
             (err) => {
                 this.error = err;
@@ -48,7 +44,7 @@ export class SongIndex_Cls extends HookCls {
             // let suspense take over until we load.
             return <Unrenderable />;
         }
-        return <this.songlist />;
+        return <IndexPage paths={this.songlist} rootPath="" />;
     }
 }
 /**

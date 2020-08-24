@@ -21,7 +21,7 @@
         "description": "whole file for a HookCls component",
         "body": [
             "import React from \"react\";",
-            "import { HookCls } from \"lib/hookcls\";",
+            "import { HookCls } from \"src/lib/hookcls\";",
             "/** all props for ${1:$TM_FILENAME_BASE} */",
             "interface $1_AllProps extends React.PropsWithChildren<$1_DefProps> {} // required props go in here.",
             "/** props defined with default values. */",
@@ -56,8 +56,8 @@
         "description": "file template for main component, note that it is assumed there is a css module file for the component as well",
         "body": [
             "import React from \"react\";",
-            "import { HookCls } from \"lib/hookcls\";",
-            "import { Main } from \"lib/reactUtil\";",
+            "import { HookCls } from \"src/lib/hookcls\";",
+            "import { Main } from \"src/lib/reactUtil\";",
             "import styles from \"./${1:$TM_FILENAME_BASE}.module.css\";",
             "/**",
             " * ${2:TODO DESCRIBE CLASS}",
