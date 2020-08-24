@@ -1,3 +1,5 @@
+// use *hookcls snippet to generate the template.
+
 import React from "react";
 import { HookCls } from "lib/hookcls";
 /** all props for MYCOMP */

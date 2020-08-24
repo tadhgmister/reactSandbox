@@ -3,7 +3,7 @@ import logo from "./logo.svg";
 import "./App.css";
 import { HookCls } from "lib/hookcls";
 import { Main } from "../../lib/reactUtil";
-
+/** default app provided by react create project, modified so it uses the hookcls. */
 class App extends HookCls {
     public useRender() {
         return (

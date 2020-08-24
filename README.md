@@ -1,3 +1,19 @@
+## Sandbox for experimentation and development
+
+this is designed to be a playground to test ideas and develop strong general use library code
+most of the actual website is pretty uninteresting but very much focus has been on:
+
+-   writing generalized code that would be useful to be ported to different applications (possibly made into standalone libraries)
+-   optimal structure of html use within react, least number of layers in the html needed to nicely format.
+    -   the `<header>` for navigation is outside the render root, there is a component that creates a portal to it.
+    -   the `<Main>` component does not add any layers but controls the class and style of react root element `<main id="root">`
+-   use of routers to ensure all tests and experiments are accesible, and site is nicely navigatable
+-   well structured source code:
+    -   api folder contains code for interacting with backend
+    -   lib contains general use functions that would be useful on real projects
+    -   src contains all application logic
+        -   each sub folder of src contains one section which has it's own route.
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts

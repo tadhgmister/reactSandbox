@@ -1,6 +1,6 @@
 import * as redux from "redux";
 import React from "react";
-import { ObjectEntries, isDefined } from "../util";
+import { ObjectEntries, isDefined } from "./util";
 import ReactDOM from "react-dom";
 
 //// NOTE: initially this will be designed to only take ReduxStore objects into the state
@@ -55,10 +55,10 @@ interface UpdateAction<S extends Record<string, ReduxState>> extends redux.Actio
      */
     data: { [K in keyof S]?: Partial<S[K]> };
 }
-type ExampleState = {
-    foo: ReduxState & { a: string; b: number };
-    bar: ReduxState & { c: string; d: number };
-};
+// type ExampleState = {
+//     foo: ReduxState & { a: string; b: number };
+//     bar: ReduxState & { c: string; d: number };
+// };
 
 /**
  * takes an object where each field is a instance of ReduxState
@@ -87,6 +87,7 @@ export class StoreHelpers<S extends Record<string, ReduxState>> {
     private midUpdate = false;
     constructor(state: S) {
         this.store = redux.createStore(makeReducer(state));
+        this.store.subscribe(this.notify.bind(this));
     }
     /**
      * NOT FULLY IMPLEMENTED
@@ -117,9 +118,6 @@ export class StoreHelpers<S extends Record<string, ReduxState>> {
     /** updates the internal state and may trigger some react updates. */
     public update = (s: { [K in keyof S]?: Partial<S[K]> }) => {
         this.store.dispatch({ type: "UPDATE", data: s });
-        if (!this.midUpdate) {
-            this.notify();
-        }
     };
     /** notifies all components that are depending on the redux state to update. */
     private notify() {
