@@ -3,7 +3,7 @@ import { HookComp } from "src/lib/oldHookCls/hooklib2";
 import { makeCompSwitch } from "src/lib/reactUtil";
 import { SongPage } from "./SongPage";
 // import { Link, Switch, Route } from "react-router-dom";
-import { fetchFolderContent } from "src/lib/util";
+import { fetchFolderContent } from "src/api";
 
 export class Glee extends HookComp {
     @HookComp.RenderAffecting
@@ -14,7 +14,7 @@ export class Glee extends HookComp {
     }
     async fetchSongList() {
         let songs = await fetchFolderContent("gleemusic/");
-        songs = songs.filter(f => !f.startsWith("."));
+        songs = songs.filter((f) => !f.startsWith("."));
         const paths: Record<string, SongPage> = {};
         for (const song of songs) {
             paths[song] = new SongPage(song + "/");

@@ -12,13 +12,18 @@ export function assert(cond: any, mes: string): asserts cond {
  * issues a warning if condition is not met, still asserts typesafety.
  * Used for non hard requirements.
  * @param cond condition to check
- * @param mes message to be printed in warnigns if not true
+ * @param mes message to be printed in warnings if not true
  */
 export function ensure(cond: any, mes: string): asserts cond {
     if (!cond) {
         console.warn(mes);
     }
 }
+/**
+ * functional equivelent to type Record, takes list of keys and makes object.
+ * @param keys list of keys
+ * @param value value to assign each key to. if mutable will be same reference for each.
+ */
 export function Record<K extends keyof any, V>(keys: K[], value: V) {
     const result = {} as Record<K, V>;
     for (const k of keys) {
@@ -26,9 +31,10 @@ export function Record<K extends keyof any, V>(keys: K[], value: V) {
     }
     return result;
 }
-
+/** https://developer.mozilla.org/en-US/docs/Web/API/IdleDeadline */
 interface IdleDeadline {
     didTimeout: boolean;
+    timeRemaining(): number;
 }
 declare global {
     interface Window {
@@ -43,11 +49,12 @@ declare global {
  * This uses the requestIdleCallback API to wait until the event loop is idle
  * If the browser doesn't support that feature this is undefined
  * @param timeout in milliseconds, a rough max time to wait before resolving.
+ * @returns true if timeout exceeded, false if idle time was found.
  */
 export const waitUntilIdle = window.requestIdleCallback === undefined ? undefined : _waitUntilIdle;
 function _waitUntilIdle(timeout?: number) {
-    return new Promise<void>((resolve) => {
-        window.requestIdleCallback!((info) => resolve(), { timeout });
+    return new Promise<boolean>((resolve) => {
+        window.requestIdleCallback!((info) => resolve(info.didTimeout), { timeout });
     });
 }
 /**
@@ -68,8 +75,8 @@ interface MainTypes {
     function: Function;
 }
 /**
- * does a typeof check but (particularly for functions or classes) doesn't assert a type like (Original | Function)
- * making it annoying to use.
+ * does a typeof check but (particularly for functions or classes) doesn't
+ * assert a type like (Original | Function) making it annoying to use.
  * @param obj any object
  * @param type string for the type to check
  */
@@ -106,18 +113,18 @@ export function ObjectEntries<T, V extends T[string & keyof T] = T[string & keyo
  * useful for type predicates that get passed into other functions.
  * @param obj any object
  */
-export function isDefined<T>(obj: T): obj is Exclude<T, undefined> {
+export function isDefined<T>(obj: T): obj is Exclude<T, undefined | void> {
     return obj !== undefined;
 }
-
-export async function fetchFolderContent(subPath = "") {
-    const response = await fetch("/api/indexof/" + subPath);
-    const body = await response.text();
-    if (body === "null") {
-        throw new Error("invalid folder name: " + subPath);
+/**
+ * similar to Array.map but for the fields of an object.
+ * the callback takes the value as first argument and key as second.
+ * does not support passing object as 3rd argument or thisArg.
+ */
+export function objectMap<T, V>(obj: T, fn: (val: T[keyof T], key: keyof T) => V) {
+    const newObj = {} as Record<keyof T, V>;
+    for (const [key, val] of ObjectEntries(obj)) {
+        newObj[key] = fn(val, key);
     }
-    return JSON.parse(body) as string[];
-    //.then(data=>data.text().then(data=>{
-    //     this.setState({songs: JSON.parse(data)});
-    // }));
+    return newObj;
 }

@@ -1,7 +1,7 @@
 import React from "react";
 // import { HookedComponent } from "src/lib/hooklib";
 import { Main } from "src/lib/reactUtil";
-import { fetchFolderContent } from "src/lib/util";
+import { fetchFolderContent } from "src/api";
 import { HookComp } from "src/lib/oldHookCls/hooklib2";
 function isValidAudio(filename: string) {
     return [".mp3", ".m4a", ".wav"].some((ext) => filename.endsWith(ext));
