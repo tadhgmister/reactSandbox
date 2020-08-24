@@ -17,7 +17,7 @@
     // }
     "HookClsFile": {
         "scope": "typescriptreact",
-        "prefix": ["hookcls", "*hookcls"],
+        "prefix": ["hookcls", "^hookcls"],
         "description": "whole file for a HookCls component",
         "body": [
             "import React from \"react\";",
@@ -52,7 +52,7 @@
     },
     "HookClsFileMain": {
         "scope": "typescriptreact",
-        "prefix": ["hookcls_main", "*hookcls_main"],
+        "prefix": ["hookcls_main", "^hookcls_main"],
         "description": "file template for main component, note that it is assumed there is a css module file for the component as well",
         "body": [
             "import React from \"react\";",
