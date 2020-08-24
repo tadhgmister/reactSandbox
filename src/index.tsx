@@ -3,15 +3,9 @@ import ReactDOM from "react-dom";
 import "./index.css";
 import * as serviceWorker from "./serviceWorker";
 import { BrowserRouter, Link, Switch, Route, useLocation } from "react-router-dom";
-import { makeCompSwitch, Main } from "../lib/reactUtil";
+import { Main } from "./lib/reactUtil";
+import { Routes } from "./components";
 
-const Routes = makeCompSwitch({
-    "splash/": React.lazy(() => import("./Splash/App")),
-    "demos/": React.lazy(() => import("./Demos/demos")),
-    "asteroids/": React.lazy(() => import("./Asteroids/Game")),
-    "gleemusic/": React.lazy(() => import("./GLEEEEE/HOOOOME")),
-    "match game/": React.lazy(() => import("./Match3/MatchGame")),
-});
 /** react component that renders a back link in the topbar of page */
 function Nav() {
     const { pathname } = useLocation();

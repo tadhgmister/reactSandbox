@@ -60,18 +60,34 @@ export function Main({ children, style, className }: MainProps) {
         </React.Fragment>
     );
 }
-
-type Comp<P> =
-    | ((props: P) => React.ReactElement | null)
-    | (new (props: P) => React.Component<P, any>);
-
 /**
  * trims leading and trailing slashes in given string
  */
 function trimSlashes(str: string) {
     return str.replace(/^\/+/, "").replace(/\/+$/, "");
 }
-export function makeCompSwitch<K extends string>(paths: Record<K, Comp<{}>>) {
+/**
+ * list of links to given paths.
+ * is a Main component usign class "index" so it is intended to always put this at the top level
+ */
+export function IndexPage(props: { paths: string[]; rootPath: string }) {
+    return (
+        <Main className="index">
+            <ul>
+                {props.paths.map((path) => (
+                    <li key={path}>
+                        <Link to={props.rootPath + path}>{trimSlashes(path)}</Link>
+                    </li>
+                ))}
+            </ul>
+        </Main>
+    );
+}
+/**
+ * returns a react component to map the given paths to a route and index page.
+ * @param paths map of string link to react component for that path.
+ */
+export function makeCompSwitch<K extends string>(paths: Record<K, React.ComponentType<{}>>) {
     function RouteSwitch() {
         const match = useRouteMatch();
         const isProper = match.path.endsWith("/");
@@ -79,24 +95,13 @@ export function makeCompSwitch<K extends string>(paths: Record<K, Comp<{}>>) {
         const routes = ObjectEntries(paths).map(([path, comp]) => (
             <Route key={path} path={rootPath + path} component={comp} />
         ));
-        const indexPage = () => {
-            return (
-                <Main className="index">
-                    <ul>
-                        {ObjectKeys(paths).map((path) => (
-                            <li key={path}>
-                                <Link to={rootPath + path}>{trimSlashes(path)}</Link>
-                            </li>
-                        ))}
-                    </ul>
-                </Main>
-            );
-        };
         const fallback = <p>404 page not found</p>;
 
         return (
             <Switch>
-                <Route path={rootPath} exact component={indexPage} />
+                <Route path={rootPath} exact>
+                    <IndexPage paths={ObjectKeys(paths)} rootPath={rootPath} />
+                </Route>
                 {routes}
                 <Route>{fallback}</Route>
             </Switch>
@@ -125,3 +130,8 @@ export function useMediaQuery(queryString: string) {
     }
     return queryMatch;
 }
+/**
+ * react lazy component that will never resolve
+ * can be used when waiting on async call to hide up to suspense.
+ */
+export const Unrenderable = React.lazy(() => new Promise(() => {}));

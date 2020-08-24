@@ -1,12 +1,12 @@
 import React from "react";
-import { HookComp } from "lib/oldHookCls/hooklib2";
-import { makeCompSwitch } from "lib/reactUtil";
+import { HookCls } from "src/lib/hookcls";
+import { makeCompSwitch } from "src/lib/reactUtil";
 import { SongPage } from "./SongPage";
 // import { Link, Switch, Route } from "react-router-dom";
-import { fetchFolderContent } from "api";
+import { fetchFolderContent } from "src/api";
 
-export class Glee extends HookComp {
-    @HookComp.RenderAffecting
+export class Glee extends HookCls {
+    @HookCls.RenderAffecting
     routes?: React.ComponentType;
     constructor() {
         super();
@@ -27,7 +27,7 @@ export class Glee extends HookComp {
         return <this.routes />;
     }
 }
-export default HookComp.finalize(Glee);
+export default Glee.createComponent();
 // const initialState = {
 //     songs: [] as string[],
 // };

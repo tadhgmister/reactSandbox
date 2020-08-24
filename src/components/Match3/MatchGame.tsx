@@ -1,6 +1,6 @@
 import React from "react";
-import { HookCls } from "lib/hookcls";
-import { Main } from "lib/reactUtil";
+import { HookCls } from "src/lib/hookcls";
+import { Main } from "src/lib/reactUtil";
 import styles from "./Match3.module.css";
 import Tile from "./Tile";
 /** all props for MatchGame */

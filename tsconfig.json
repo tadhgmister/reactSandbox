@@ -19,5 +19,5 @@
         "useDefineForClassFields": true,
         "keyofStringsOnly": false
     },
-    "include": ["src", "lib", "api"]
+    "include": ["src"]
 }

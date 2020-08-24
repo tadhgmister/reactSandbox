@@ -1,4 +1,4 @@
-import { StoreHelpers, ReduxState } from "lib/reduxlib";
+import { StoreHelpers, ReduxState } from "src/lib/reduxlib";
 
 class Theme extends ReduxState {
     /** background for theme */
