@@ -1,9 +1,9 @@
 import React from "react";
-import { HookComp } from "src/lib/oldHookCls/hooklib2";
-import { makeCompSwitch } from "src/lib/reactUtil";
+import { HookComp } from "lib/oldHookCls/hooklib2";
+import { makeCompSwitch } from "lib/reactUtil";
 import { SongPage } from "./SongPage";
 // import { Link, Switch, Route } from "react-router-dom";
-import { fetchFolderContent } from "src/api";
+import { fetchFolderContent } from "api";
 
 export class Glee extends HookComp {
     @HookComp.RenderAffecting

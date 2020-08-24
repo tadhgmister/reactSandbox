@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import "./index.css";
 import * as serviceWorker from "./serviceWorker";
 import { BrowserRouter, Link, Switch, Route, useLocation } from "react-router-dom";
-import { makeCompSwitch, Main } from "./lib/reactUtil";
+import { makeCompSwitch, Main } from "../lib/reactUtil";
 
 const Routes = makeCompSwitch({
     "splash/": React.lazy(() => import("./Splash/App")),

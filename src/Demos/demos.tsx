@@ -1,10 +1,10 @@
 import React from "react";
-import { HookedComponent } from "src/lib/oldHookCls/hooklib1";
-import { Popout } from "src/lib/Popout";
-import { Main } from "src/lib/reactUtil";
-import store from "src/lib/redux";
-import * as actions from "src/lib/redux/actions";
-import { useFormInput } from "src/lib/hooks";
+import { HookedComponent } from "lib/oldHookCls/hooklib1";
+import { Popout } from "lib/Popout";
+import { Main } from "lib/reactUtil";
+import store from "lib/redux";
+import * as actions from "lib/redux/actions";
+import { useFormInput } from "lib/hooks";
 export class Demos extends HookedComponent {
     public useRender() {
         const bg = store.useState(({ theme }) => theme.bg);

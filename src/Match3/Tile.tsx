@@ -1,5 +1,5 @@
 import React from "react";
-import { HookCls } from "src/lib/hookcls";
+import { HookCls } from "lib/hookcls";
 import styles from "./Match3.module.css";
 /** all props for Tile */
 interface Tile_AllProps extends React.PropsWithChildren<Tile_DefProps> {

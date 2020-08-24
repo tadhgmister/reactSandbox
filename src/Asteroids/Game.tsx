@@ -1,7 +1,7 @@
 import React from "react";
-import { HookCls } from "src/lib/hookcls";
-import { Main } from "src/lib/reactUtil";
-import { useIntermittentUpdate } from "src/lib/gameHelpers";
+import { HookCls } from "lib/hookcls";
+import { Main } from "lib/reactUtil";
+import { useIntermittentUpdate } from "lib/gameHelpers";
 import { Actor, testContext } from "./Actor";
 /**
  * makes a callback that can take the time in ms since last time it was called and

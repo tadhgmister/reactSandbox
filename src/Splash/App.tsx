@@ -1,8 +1,8 @@
 import React from "react";
 import logo from "./logo.svg";
 import "./App.css";
-import { HookCls } from "src/lib/hookcls";
-import { Main } from "../lib/reactUtil";
+import { HookCls } from "lib/hookcls";
+import { Main } from "../../lib/reactUtil";
 
 class App extends HookCls {
     public useRender() {

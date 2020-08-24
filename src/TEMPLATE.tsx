@@ -1,5 +1,5 @@
 import React from "react";
-import { HookCls } from "src/lib/hookcls";
+import { HookCls } from "lib/hookcls";
 /** all props for MYCOMP */
 interface MYCOMP_AllProps extends React.PropsWithChildren<MYCOMP_DefProps> {} // required props go in here.
 /** props defined with default values. */

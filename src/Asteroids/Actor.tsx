@@ -1,5 +1,5 @@
 import React from "react";
-import { HookCls } from "src/lib/hookcls";
+import { HookCls } from "lib/hookcls";
 
 export const testContext = React.createContext("red");
 /** all props for Actor */
