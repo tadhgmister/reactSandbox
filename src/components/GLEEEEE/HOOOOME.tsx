@@ -2,7 +2,6 @@ import React from "react";
 import { HookCls } from "src/lib/hookcls";
 import { makeCompSwitch } from "src/lib/reactUtil";
 import { SongPage } from "./SongPage";
-// import { Link, Switch, Route } from "react-router-dom";
 import { fetchFolderContent } from "src/api";
 
 export class Glee extends HookCls {

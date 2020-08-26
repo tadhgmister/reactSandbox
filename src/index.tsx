@@ -9,15 +9,13 @@ import { Routes } from "./components";
 /** react component that renders a back link in the topbar of page */
 function Nav() {
     const { pathname } = useLocation();
-    const pathlevels = pathname.split("/");
-    const levelstoremove = pathname.endsWith("/") ? 2 : 1;
-    const backPath = pathlevels.slice(0, pathlevels.length - levelstoremove).join("/");
+    const path = pathname.endsWith("/") ? ".." : ".";
     return ReactDOM.createPortal(
         <Switch>
             <Route exact path="/" />
             {/* for any route other than root, create a link going back a page. */}
             <Route>
-                <Link to={backPath}>Back</Link>
+                <Link to={path}>Back</Link>
             </Route>
         </Switch>,
         document.getElementById("topbar")!,

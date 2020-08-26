@@ -1,8 +1,7 @@
 import React from "react";
 import * as api from "src/api";
 import { HookCls } from "src/lib/hookcls";
-import { Main, makeCompSwitch, Unrenderable, IndexPage } from "src/lib/reactUtil";
-import styles from "./Glee.module.css";
+import { Unrenderable, IndexPage } from "src/lib/reactUtil";
 
 /**
  * dev notes
@@ -44,7 +43,7 @@ export class SongIndex_Cls extends HookCls {
             // let suspense take over until we load.
             return <Unrenderable />;
         }
-        return <IndexPage paths={this.songlist} rootPath="" />;
+        return <IndexPage paths={this.songlist} />;
     }
 }
 /**
