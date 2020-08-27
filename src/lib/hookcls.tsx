@@ -98,7 +98,7 @@ export abstract class HookCls<P = {}> {
         const innerFields = this._hookInitManagedFields;
         // this calls all hooks that were initialized by using HookInit
         for (const field in hooks) {
-            if (hooks.hasOwnProperty(field)) {
+            if (Object.prototype.hasOwnProperty.call(hooks, field)) {
                 innerFields[field] = hooks[field]();
             }
         }
@@ -123,7 +123,7 @@ export abstract class HookCls<P = {}> {
             return inst[HOC_RENDER](props);
         });
         comp.displayName = `HookCls(${this.displayName ?? this.name})`;
-        comp.defaultProps = this.defaultProps;
+        comp.defaultProps = this.defaultProps as any;
         // using typeof comp & {defaultProps: DP} leaves the Partial<P> for default props from forward ref component
         // which breaks the whole default props system, instead we will just explicitly give type that doesn't behave badly.
         // if typescript JSX had a better way to handle props this wouldn't be as complicated...
@@ -144,7 +144,7 @@ export abstract class HookCls<P = {}> {
     protected static RenderAffecting(_proto: HookCls<any>, field: keyof any) {
         const proto = _proto as PrivateHookClsProto<any>;
         // note that field must be (keyof any) to let this be used on private fields.
-        if (!proto.hasOwnProperty("_renderAffectingFields")) {
+        if (!Object.prototype.hasOwnProperty.call(proto, "_renderAffectingFields")) {
             // subclass doesn't have it's own list so we need to create a new one for it.
             // by spreading the properties from the above prototype we ensure several subclasses don't break.
             const renFields = (proto._renderAffectingFields = [...proto._renderAffectingFields]);
@@ -179,7 +179,7 @@ export abstract class HookCls<P = {}> {
         // we need to return a new decorator that just reads an internal value
         const hookToCall = desc.initializer;
         // if this is the first HookInit property we need to create the new mapping on this prototype
-        if (!proto.hasOwnProperty("_HookInitFields")) {
+        if (!Object.prototype.hasOwnProperty.call(proto, "_HookInitFields")) {
             // copy any that might exist in super class so multiple subclasses don't break
             proto._hookInitInitHooks = { ...proto._hookInitInitHooks };
         }

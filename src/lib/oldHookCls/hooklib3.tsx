@@ -1,5 +1,6 @@
 import React from "react";
-import { assert } from "../util";
+import { assert, ObjectKeys } from "../util";
+// eslint-disable-next-line react/display-name
 const FORWARD_REF_TYPE = (React.forwardRef((p, r) => null) as any).$$typeof;
 assert(FORWARD_REF_TYPE !== undefined, "forward ref type not determined");
 
@@ -21,7 +22,7 @@ export abstract class HookCls<P = {}, F extends (...args: any[]) => null = () =>
     /** stores persistent function component to serve as the basis for this.useRender */
     private [INTERNAL_COMP]: (props: Parameters<this["useRender"]>[0]) => React.ReactElement | null;
     constructor() {
-        this[INTERNAL_COMP] = props => {
+        this[INTERNAL_COMP] = (props) => {
             return this.useRender(props, ...this[HOC_ARGS]);
         };
         // a function component (or class) that may have display name, used twice in next statement.
@@ -31,7 +32,7 @@ export abstract class HookCls<P = {}, F extends (...args: any[]) => null = () =>
     protected _internalHOCrender(props: P, ...args: Parameters<F>) {
         this[HOC_ARGS] = args;
         const C = this[INTERNAL_COMP];
-        return <C {...props} />;
+        return <C {...(props as any)} />;
     }
 
     public static finalize<T extends new () => HookCls<any, (...args: any[]) => null>>(Cls: T) {

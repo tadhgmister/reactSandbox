@@ -101,7 +101,7 @@ export abstract class HookCls<P> {
             return inst[INTERNAL_COMP](props);
         });
         result.displayName = `HookCls(${(Cls as any).displayName ?? Cls.name})`;
-        result.defaultProps = defaultProps;
+        result.defaultProps = defaultProps as any;
         // type OutwardProps = DP extends P
         //     ? Partial<P>
         //     : keyof DP extends never
@@ -133,7 +133,7 @@ export abstract class HookCls<P> {
         if (diff) {
             throw new Error("diff feature not implemented");
         }
-        return function<F extends keyof any>(proto: HookCls<any> & { [k in F]: V }, field: F) {
+        return function <F extends keyof any>(proto: HookCls<any> & { [k in F]: V }, field: F) {
             if (Object.getOwnPropertyDescriptor(proto, "renderAffectingFields") === undefined) {
                 proto._renderAffectingFields = [...proto._renderAffectingFields];
                 proto._proxyHandle = {
