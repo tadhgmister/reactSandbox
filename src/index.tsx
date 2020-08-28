@@ -5,11 +5,14 @@ import * as serviceWorker from "./serviceWorker";
 import { BrowserRouter, Link, Switch, Route, useLocation } from "react-router-dom";
 import { Main } from "./lib/reactUtil";
 import { Routes } from "./components";
+import { assert } from "./lib/util";
 
 /** react component that renders a back link in the topbar of page */
 function Nav() {
     const { pathname } = useLocation();
     const path = pathname.endsWith("/") ? ".." : ".";
+    const topbar = document.getElementById("topbar");
+    assert(topbar !== null, "topbar was removed from index.html");
     return ReactDOM.createPortal(
         <Switch>
             <Route exact path="/" />
@@ -18,9 +21,7 @@ function Nav() {
                 <Link to={path}>Back</Link>
             </Route>
         </Switch>,
-        // I know topbar exists because it's hardcoded into the index.html
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        document.getElementById("topbar")!,
+        topbar,
     );
 }
 /**
