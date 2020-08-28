@@ -58,6 +58,7 @@ export abstract class HookCls<P = {}> {
 
     constructor() {
         // COMP needs to bind to the proxy if we use a proxy, otherwise RenderAffecting is nearly useless
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
         let _this = this;
         this._COMP = (props: P) => {
             return _this.useRender(props);
@@ -70,7 +71,7 @@ export abstract class HookCls<P = {}> {
         }
     }
     /** internal rendering function component. see description on this[HOC_RENDER] for more info */
-    private _COMP: React.FunctionComponent<P>;
+    private readonly _COMP: React.FunctionComponent<P>;
     /**
      * The rendering scheme for HookCls is as follows:
      * - createComponent creates a forward ref component which handles
@@ -141,7 +142,7 @@ export abstract class HookCls<P = {}> {
      * it is visible immidiately, and this._force_update() is called for you.
      * Note that it won't trigger a react update if (newVal === oldVal)
      */
-    protected static RenderAffecting(_proto: HookCls<any>, field: keyof any) {
+    protected static readonly RenderAffecting = (_proto: HookCls<any>, field: keyof any) => {
         const proto = _proto as PrivateHookClsProto<any>;
         // note that field must be (keyof any) to let this be used on private fields.
         if (!Object.prototype.hasOwnProperty.call(proto, "_renderAffectingFields")) {
@@ -149,9 +150,9 @@ export abstract class HookCls<P = {}> {
             // by spreading the properties from the above prototype we ensure several subclasses don't break.
             const renFields = (proto._renderAffectingFields = [...proto._renderAffectingFields]);
             proto._proxyHandle = {
-                set(target, field: keyof typeof target, value, rec) {
-                    const do_update = renFields.includes(field) && value !== target[field];
-                    const success = Reflect.set(target, field, value, rec);
+                set(target, key: keyof typeof target, value, rec) {
+                    const do_update = renFields.includes(key) && value !== target[key];
+                    const success = Reflect.set(target, key, value, rec);
                     if (success && do_update) {
                         target._force_update();
                     }
@@ -160,17 +161,17 @@ export abstract class HookCls<P = {}> {
             };
         }
         proto._renderAffectingFields.push(field);
-    }
-    private _hookInitManagedFields: Record<any, any> = {};
+    };
+    private readonly _hookInitManagedFields: Record<any, any> = {};
     /**
      * highly experimental decorator for properties which are just result of a hook call every render.
      * this is using legacy decorator stuff that isn't even type safe so browser compatibility is completely con
      */
-    protected static HookInit(
+    protected static HookInit = (
         _proto: HookCls<any>,
         field: keyof any,
         desc?: PropertyDescriptor & { initializer?: () => any },
-    ) {
+    ) => {
         const proto = _proto as PrivateHookClsProto<any>;
         if (desc?.initializer === undefined) {
             throw new Error("HookInit only works when descriptor has initializer property");
@@ -187,12 +188,16 @@ export abstract class HookCls<P = {}> {
         const newDesc: PropertyDescriptor = {
             enumerable: desc.enumerable,
             configurable: desc.configurable,
-            get(this: HookCls<any>) {
+            get(this: HookCls<any>): any {
+                // no-unsafe-return should be able to see I have explicitly labeled the getter to return any
+                // how is this still considered unsafe? Obviously the rule is intended for people who don't want any anywhere
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                 return this._hookInitManagedFields[field as any];
             },
         };
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return newDesc as any; // typescript forces descriptors to return void or any.
-    }
+    };
     ////// STATEFUL REDUCERS
     /**
      * creates a subclass of HookCls with extra fields automatically generated
@@ -209,12 +214,14 @@ export abstract class HookCls<P = {}> {
         // to call hooks every render cannot change at runtime.
         const map = Object.freeze(stateAndReducerSpec);
         abstract class Wrapped<Props = {}> extends this<Props> {
-            private _reducer_store = {} as P; // constructor fills in the values.
+            // constructor fills in the values.
+            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+            private readonly _reducer_store = {} as P;
             /**
              * map of underlying setstate dispatches. we will always call with the function syntax so we only declare that format.
              * This is filled in the first render, if updates are called before
              */
-            private _reducer_updaters: {
+            private readonly _reducer_updaters: {
                 [K in keyof P]?: (update: (s: P[K]) => P[K]) => void;
             } = {};
             constructor() {
@@ -254,14 +261,14 @@ export abstract class HookCls<P = {}> {
         const proto = Wrapped.prototype as Wrapped<any> & AddedFields;
         for (const field of Object.keys(map) as (keyof P)[]) {
             Object.defineProperty(proto, field, {
-                get() {
+                get(): any {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                     return this._reducer_store[field];
                 },
             });
         }
-        return (Wrapped as unknown) as Pick<typeof Wrapped, any> & {
-            new <P = {}>(): Wrapped<P> & Readonly<AddedFields>;
-        };
+        return (Wrapped as unknown) as Pick<typeof Wrapped, any> &
+            (new <P = {}>() => Wrapped<P> & Readonly<AddedFields>);
     }
 }
 // _renderAffectingFields will always have some elements, simplifies logic inside a little

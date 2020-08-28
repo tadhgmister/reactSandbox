@@ -9,6 +9,8 @@ interface Actor_AllProps extends Actor_DefProps {
     /** y coordinate of the circle */
     y: number;
 }
+/* eslint-disable @typescript-eslint/explicit-member-accessibility,
+@typescript-eslint/no-extraneous-class,@typescript-eslint/no-magic-numbers */
 /** props defined with default values. */
 class Actor_DefProps {
     /** colour of circle. */
@@ -16,6 +18,8 @@ class Actor_DefProps {
     /** radius of the circle. */
     size = 10;
 }
+/* eslint-enable @typescript-eslint/explicit-member-accessibility, 
+@typescript-eslint/no-extraneous-class,@typescript-eslint/no-magic-numbers */
 /**
  * Actor in asteroids game, intended to be put in an svg tag
  */
@@ -24,7 +28,7 @@ export class Actor_Cls extends HookCls<Actor_AllProps> {
     public static defaultProps = new Actor_DefProps();
 
     @HookCls.HookInit
-    private stroke = React.useContext(testContext);
+    private readonly stroke = React.useContext(testContext);
     protected useRender(props: Actor_AllProps) {
         return (
             <circle

@@ -1,0 +1,107 @@
+/*
+these rules are enabled for very good reasons, the alternative is bad.
+all rules labeled as errors should be in here, any that are warn should have auto-fixes.
+no style related rules should be strict, only logic breaking stuff.
+*/
+{
+    "rules": {
+        // it can be easy to define a method in interface twice by accident
+        // (in class if both have implementation that is already an error)
+        // in this case it's almost always an accident, if the intent is to be
+        // overloads then they should be put next to each other.
+        "@typescript-eslint/adjacent-overload-signatures": "error",
+
+        // `Array(n)` creates an empty array with space for `n` elements
+        // `Array(n, a, ...)` creates a new array with those elements, equivelent to `[n,a,...]`
+        // it is almost always a mistake to use array constructor instead of just []
+        // except when passing explicit generic to Array in order to ensure
+        // correct type which is allowed by the typescript rule.
+        "no-array-constructor": "off",
+        "@typescript-eslint/no-array-constructor": ["error"],
+
+        // this rule will help point people towards the Map and Set data structure.
+        // there are weird things that can happen when the field overlaps with built in names.
+        "@typescript-eslint/no-dynamic-delete": ["error"],
+
+        // this rule only checks that you don't have repeated !! within the same statement
+        // it's fine to do a null assertion on a value that can't be null (which is useful for development during refactoring)
+        "@typescript-eslint/no-extra-non-null-assertion": ["error"],
+        // don't use x! assertion after a x?.f chain, it doesn't make any sense.
+        // the whole point of the x?.f syntax is to end up undefined if the original object was undefined
+        // there is absolutely no reason to then say "either way treat it like it was definitely defined"
+        // the correct alternative is `x!.f` to say "I know x is defined, give me f"
+        "@typescript-eslint/no-non-null-asserted-optional-chain": ["error"],
+
+        // you want for-of loop for an array, not for in.
+        "@typescript-eslint/no-for-in-array": ["error"],
+
+        // the solution to implied-eval is almost always just don't use a string
+        // but in the rare case that you are justified in doing whatever you are doing
+        // then you can override this error with a very good explaination of how you know you aren't going to break stuff
+        // and why you can't just use a plain function.
+        "@typescript-eslint/no-implied-eval": ["error"],
+
+        // it only makes sense to use void for return type, try to use undefined when you can
+        // there are cases like the second generic to Iterator which represents a return of the generator
+        // that there it makes a lot of sense to use void but this marks it as error, that kind of case where
+        // you know the use of void is valid you can disable the rule and comment how it represents the return type.
+        "@typescript-eslint/no-invalid-void-type": ["error"],
+
+        // on a class `constructor` refers to the initialization code and `new` is a method
+        // on an interface `new` is the constructor signature and `constructor` is a method
+        // it's silly but true, so to avoid any confusion just don't make a method called `constructor` or `new`
+        // also know that `new` is saying that the interface can be used like a class, it can be called with `new X()`
+        // the interface for an object doesn't need to define a constructor because just using the object the constructor is irrelevent.
+        "@typescript-eslint/no-misused-new": ["error"],
+
+        // namespaces and modules are outdated, just use a seperate file to store stuff.
+        // this is set to warn instead of error because in the event code is taken from elsewhere that uses namespace then it shouldn't be blocked
+        "@typescript-eslint/no-namespace": ["warn"],
+        // imports give typesafety, require function does not.  Use import.
+        "@typescript-eslint/no-require-imports": ["error"],
+        // triple slash references are out dated, use import instead.
+        "@typescript-eslint/triple-slash-reference": "error",
+
+        // javascript allowing throwing non errors is crazy, if you want to throw an error then `throw new Error('msg')`
+        // if you are using throw to pass data in a different control flow, then first consider if your code can be refactored to not use throw.
+        // if it can't be refactored then it may be acceptable to override this rule with clear comments for what you are doing,
+        // but always try to refactor first.
+        "@typescript-eslint/no-throw-literal": ["error"],
+
+        // it is perfectly acceptable to use ts comments during development
+        // but you sure as heck don't want to leave them there.
+        // will enable both as warnings, so auto-fix replaces ignore with expect-error
+        // but both should be eventually removed before commiting code.
+        "@typescript-eslint/ban-ts-comment": "warn",
+        "@typescript-eslint/prefer-ts-expect-error": "warn",
+
+        // the condition is less than but incrementer is decreasing the index or vice versa
+        // condition doesn't make sense, easy typo to make but will cause infinite loop.
+        "for-direction": "error",
+
+        // accidentally putting an assignment instead of a condition is easy enough to do and hard enough to spot that
+        // this is error. However the use case like: `while(data = getData())` should use an additional check like:
+        // `while(isDefined(data = getData())){}` or `(data=getData())!==""` is considered valid
+        // strangly, `if((x = ''))` is also not labeled an error, but theres not much I want to do about that.
+        "no-cond-assign": "error",
+
+        // using debugger() is ok during short term development, but must always be removed.
+        "no-debugger": "warn",
+
+        // you almost certainly didn't mean to have duplicate case.
+        "no-duplicate-case": "error",
+        // empty blocks should always contain at least a comment for why they are empty
+        // should never be set to error though. warning is useful as something to revisit.
+        "no-empty": "warn",
+
+        // a regex `[]` doesn't match anything, a regex containing an empty set is probably wrong.
+        // would set to error if the red underline was only under the empty set
+        // but as underlining the entire regex it will remain a warning.
+        "no-empty-character-class": "warn",
+        // want this grouped with no-empty-character-class, also warning from invalid regex.
+        "no-misleading-character-class": "warn",
+
+        // there is absolutely no reason to reassign the error parameter.
+        "no-ex-assign": "error"
+    }
+}

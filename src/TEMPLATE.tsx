@@ -4,10 +4,15 @@ import React from "react";
 import { HookCls } from "src/lib/hookcls";
 /** all props for MYCOMP */
 interface MYCOMP_AllProps extends React.PropsWithChildren<MYCOMP_DefProps> {} // required props go in here.
+
+/* eslint-disable @typescript-eslint/explicit-member-accessibility, 
+@typescript-eslint/no-extraneous-class,@typescript-eslint/no-magic-numbers */
 /** props defined with default values. */
 class MYCOMP_DefProps {
     // props with default values here. remember to document all props
 }
+/* eslint-enable @typescript-eslint/explicit-member-accessibility, 
+@typescript-eslint/no-extraneous-class,@typescript-eslint/no-magic-numbers */
 /**
  * TODO: DESCRIBE CLASS HERE
  */

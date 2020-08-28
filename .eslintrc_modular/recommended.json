@@ -1,0 +1,189 @@
+/*
+these rules are recomendations to improve quality but not strict.
+it is acceptable to disable a rule for a specific case with a comment explaining why.
+*/
+{
+    "rules": {
+        // will let the auto formatter put in semicolons
+        // and what I really want is to warn of statements that
+        // may be automatically joined by the formatter unintentionally
+        "semi": "off",
+        "@typescript-eslint/semi": ["off"],
+        "no-unexpected-multiline": "warn",
+
+        // ts already gives a note, would like it to be a little more noticable.
+        // I really want it to be ok with awaiting on `T | Promise<T>`
+        // and my testing of the rule ran into some issues, will try later.
+        "@typescript-eslint/await-thenable": ["warn"],
+
+        // by default using String, Number, Boolean etc. with capital
+        // I don't think there is an actual difference as far as typescript is concerned
+        // if you do intend to use an object wrapper like String, it is acceptable to override
+        // this rule for specific cases with a comment about what you are doing.
+        "@typescript-eslint/ban-types": ["warn"],
+
+        // readonly is prefered for constants, getters are a little more footprint
+        // technically I'd prefer global constants over instance constants
+        // but I wouldn't enforce "no readonly literals" since that is just discouraging
+        // using readonly then, so this is fine.
+        "@typescript-eslint/class-literal-property-style": ["warn", "fields"],
+
+        // interfaces are slightly prefered in cases where they are applicable,
+        // mapped types `{[k in keyof T]: string}` are only valid in type so
+        // it is possible that during refactoring the auto-fix will change a type to
+        // interface then it has to be manually changed back to use mapped type
+        // if this does get annoying then this rule should be disabled.
+        "@typescript-eslint/consistent-type-definitions": ["warn", "interface"],
+
+        // it is fine to override this for backwards compatibility, although if it does come up
+        // then the function signature should probably be deprecated.
+        // parameters that have reasonable default arguments should be at the end so the caller
+        // doesn't have to explicitly pass undefined,
+        // I always get annoyed that `JSON.stringify(x, undefined, 3)` needs 2nd argument to get indent
+        // just put required arguments first.
+        "@typescript-eslint/default-param-last": ["warn"],
+        // prefer to always mark visibility since private members that are unused give notification
+        // but public fields that are unused anywhere are not indicated.
+        // for this reason it's preferable to keep all fields intended to use internally private
+        // so we will enforce visibility modifiers so there needs to be a concious desision.
+        "@typescript-eslint/explicit-member-accessibility": [
+            "warn",
+            {
+                "accessibility": "explicit",
+                "overrides": {
+                    // it is so rare to have constructors that aren't public, just don't check.
+                    "constructors": "off"
+                }
+            }
+        ],
+        // TODO: come back to this.
+        "@typescript-eslint/naming-convention": ["warn"],
+        // this is designed to warn you when you are going to get `[Object object]`
+        // or something equally unuseful inside a string. If it gives error incorrectly
+        // it is possible the type of data has a good `.toString()` method that is not in the known type
+        // so the correct solution is probably just declare that it's there:
+        /* ```ts
+        interface MyClass {
+            /**
+            * SomeLibraryClass implements a toString (verified emperically) 
+            * but type doesn't contain it. so we are declaring that it exists so
+            * eslint rule `no-base-to-string` doesn't complain when we print it.
+            // END COMMENT OMITTED BECAUSE THIS IS IN JSON
+            toString(): string;
+        }
+        class Test extends SomeLibraryClass {
+            // code here
+        }
+        ```*/
+        "@typescript-eslint/no-base-to-string": ["warn"],
+        // empty function body doesn't error if the body contains a comment
+        // so in nearly all cases a function should at least contain a comment explaining why it exists but does nothing.
+        "no-empty-function": "off",
+        "@typescript-eslint/no-empty-function": ["warn"],
+        // if a class doesn't actually do anything that makes sense to structure into a class
+        // then give a warning, it is typical to get this when first creating a class but once it has some
+        // functionality then it should go away, if the warning persists then reconsider whether it makes sense to use a class.
+        "@typescript-eslint/no-extraneous-class": ["warn"],
+        // having a bunch of numbers appear in equations can be really hard to track,
+        // even if it's just on the line before you do `const secInHour = 3600` it can
+        // highly improve readability, especially once you inevitably realize you need to reuse the number more than once.
+        // TODO: why does it not do what eslint page sais it does (line below)
+        // it also flags invalid array indices as errors, like arr[2.5] isn't caught by typescript but is caught by this rule.
+        "no-magic-numbers": "off",
+        "@typescript-eslint/no-magic-numbers": [
+            "warn",
+            {
+                // allow few small numbers, I strongly prefer using `x+=1` over `x++`
+                "ignore": [-1, 0, 1, 2],
+                // enums should abolutely be allowed to use arbitrary numbers
+                "ignoreEnums": true,
+                // readonly class properties is a fine place to put magic numbers :)
+                "ignoreReadonlyClassProperties": true
+            }
+        ],
+        // while I consider using `any` for un typesafe code as ok, I do think that calling
+        // functions should have some kind of info that it's a function.
+        "@typescript-eslint/no-unsafe-call": ["warn"],
+        // I'm all for inferring return type as much as possible, but returning type any
+        // is kind of super unhelpful. If you are writing a function surely you know what format the return is.
+        // most cases I expect this to show up is you return `JSON.parse` in which case even just `Record<string, unknown>` is better than any.
+        // during development it's reasonable to ignore this until you get back to it, but functions should have anything better than any.
+        "@typescript-eslint/no-unsafe-return": ["warn"],
+
+        // cases where maybe you expected to return an expression, particularly something like:
+        // `arr.map(val=>{val})` is a function body, not object literal and while the returned array is `void[]`
+        // it'd be nice to have the error directly on the `val` is expression on own.
+        "@typescript-eslint/no-unused-expressions": ["warn"],
+        // using `"hello" as "hello"` is super redundant, instead use `as const`
+        "@typescript-eslint/prefer-as-const": ["warn"],
+        // if you loop over indices of an array and only use index to access array element:
+        // `for(let idx=0; idx<arr.length; idx++){alert(arr[idx]);}`
+        // this can be simplified to use a for-of loop:
+        // `for(const elem of arr){alert(elem)}`
+        // which is highly prefered, this rule would be better with an auto-fix :(
+        "@typescript-eslint/prefer-for-of": ["warn"],
+        // includes is a great feature, doing `indexOf(a) === -1` is outdated.
+        "@typescript-eslint/prefer-includes": ["warn"],
+        // statsWith and endsWith are much nicer than older alternatives
+        "@typescript-eslint/prefer-string-starts-ends-with": ["warn"],
+        // aparently there are 2 functions that in a specific case do identical things
+        // but one is objectively better, which kind of makes me wonder why the slower one isn't
+        // just an alias to the faster one but ok, sure lets have ambiguity and leave it up to
+        // linters to suggest using the better option.
+        "@typescript-eslint/prefer-regexp-exec": ["warn"],
+        // a function marked as async will always return a promise, even one that fails
+        // a non async function that returns a promise may throw an error or return a failed promise.
+        // code that deals with the returned promise will rarely deal with also possibly throwing an error
+        // so marking all promise-returning functions as async simplifies possible error logic.
+        "@typescript-eslint/promise-function-async": ["warn"],
+        // async functions are allowed to return promises, so `return await x` is redundant
+        // except inside a try/catch block where an error thrown by the promise would be caught by catch block.
+        // so this gives warning for using `return await` outside since just returning the promise is perfectly fine.
+        "no-return-await": "off",
+        "@typescript-eslint/return-await": "warn",
+        // this mainly is to correct Promise<boolean> inside conditional.
+        // but also putting random objects in a conditional is frequently to check if they are non nullish
+        // in which case a function like isDefined would be clearer (and asserts type)
+        "@typescript-eslint/strict-boolean-expressions": [
+            "warn",
+            {
+                // typescript correctly gets type for when right hand side is non boolean:
+                // `declare const x: boolean; const y = x || 'hi'` => `typeof y == true | 'hi'`
+                // and unlike the tslint rule, ignoring rhs still marks `if(x || 'hi')` as an warning so no reason to enforce rhs.
+                "ignoreRhs": true,
+                // boolean | null or `boolean?` is fine to pass to a condition to me,
+                // defaulting to false would be preferable but there are cases that just doesn't work
+                // and doing `== true` makes it definitely boolean but conflicts with no-unnecessary-boolean-literal-compare
+                "allowNullable": true
+            }
+        ],
+        // overloads can make other types that manipulate the functions types not work
+        // nearly as well as you might hope as well as occasionally cause undesired behaviour, like:
+        /*```ts
+        declare function f(x: number): void;
+        declare function f(x: string): void;
+
+        declare const thing: number | string;
+        f(thing); // not valid, doesn't match number or string overload.
+        ```*/
+        // so if the linter rule sais you can unify the signatures please do :)
+        "@typescript-eslint/unified-signatures": ["warn"],
+        // sort of a weird thing to do, put a function inside blocks
+        // but I don't think it makes sense to deny it.
+        "no-inner-declarations": "warn",
+        // return or throw inside a finally will do weird things and is different in different languages,
+        //  just don't do it if you can help it.
+        "no-unsafe-finally": "warn",
+        // `!x instanceof Foo` resolves to `(!x) instanceof Foo` which is unhelpful.
+        // this actually triggers along with ts(2358) (argument to instanceof must be object type)
+        // and `The condition is always true.` from typescript-eslint/strict-boolean-expressions
+        // this one is the only one that clearly indicates how to fix.
+        "no-unsafe-negation": "warn",
+        // using `+= await` loads the value before await, then waits at which time the variable could change
+        // then it does increment, so race condition can cause variable to become invalid.
+        // shouldn't use await or yield in an incrementer.
+        "require-atomic-updates": "warn",
+        // x === NaN always evaluates to false, use Number.isNaN instead.
+        "use-isnan": "warn"
+    }
+}

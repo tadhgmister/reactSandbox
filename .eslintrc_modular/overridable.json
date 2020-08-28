@@ -1,0 +1,133 @@
+/*
+these rules are intended to catch common typos to ensure you are doing what you intend.
+for example bitwise & and | are sometimes used in place of logical && and || 
+so there is a rule that "disallows" bitwise operators, however it is fully expected that
+if you do need a bitwise operator you should use a eslint-disable comment
+that way the comment indicates to other programmers that you do indeed intend to be using bitwise.
+*/
+{
+    "rules": {
+        // see comments below for 2 parts this rule does.
+        "@typescript-eslint/consistent-type-assertions": [
+            "warn",
+            {
+                // this is strict, there is no reason to use `<T>x` for type casting it's not valid in tsx file
+                // and using it in a .ts file is probably trying to do JSX and being interpreted as typecast by accident.
+                "assertionStyle": "as",
+                // this is an important thing to know: `{} as T` doesn't raise an error if
+                // the object is missing required fields, there are cases where that is fine
+                // like if you are about to initialize all the fields in a loop right below
+                // in which cases disabling the rule for that like is fine, but in general `as T` for
+                // object literals can lead to missing fields which is bad
+                "objectLiteralTypeAssertions": "never"
+            }
+        ],
+        // prefixing with I for interfaces is silly, they are types, let them be types.
+        // The tslint version gave errors on types like "Incrementer" but this version only
+        // errors on I followed by another capital letter, if an interface makes sense to
+        // follow that pattern please disable this rule for that type.
+        // just don't add an I to every interface you make.
+        // TODO: maybe move this to deprecated and use naming convension
+        "@typescript-eslint/interface-name-prefix": "warn",
+        // null assertions are fine during development (as something to come back to after testing etc.)
+        // but in general there should be some kind of better handling, something like `assert(x !== undefined)` on the line before
+        // usually does the trick. In a case where a null assertion is valid a comment for why you
+        // are convinced it's safe but typescript isn't convinced, is reasonable.
+        "@typescript-eslint/no-non-null-assertion": ["warn"],
+        // there are cases where an alias to `this` is necessary, just be sure to comment why it is
+        // in addition to the comment to bypass this rule.
+        "@typescript-eslint/no-this-alias": ["warn"],
+        // technically `{(x: string):void}` is equivelent to `(x:string) => void`
+        // the first is confusing, so discuraged. I don't expect this to come up much since
+        // putting call signatures into interfaces is already pretty rare.
+        // there is an edge case where this rule with it's auto-fix is actually very harmful
+        // if there is a class that the constructor makes `this` a valid callable, an interface is needed
+        // in parallel to the class to define the call signature for the instance.  In this case you absolutely need
+        // an interface with the call signature, and the auto-fix makes a conflicting type definition to the
+        // class instead of merging namespace.  In this case please disable the rule.
+        "@typescript-eslint/prefer-function-type": ["warn"],
+        // use `x ?? y` if it should resolve to y if x isn't null or undefined
+        // use `x || y` if it should resulve to y if x is 0,'',false,null,undefined
+        // in the second case a comment disabling this rule will indicate the need for that behaviour.
+        // also explcitly disable auto-fix so that `(boolean | undefined) || other` is not auto converted.
+        "@typescript-eslint/prefer-nullish-coalescing": ["warn", { "forceSuggestionFixer": true }],
+        // see above rule, `x && x.a` almost always should just be `x?.a` but for 0 or ''
+        // the behaviour is slightly different, override if needed but almost certainly use optional chaining
+        "@typescript-eslint/prefer-optional-chain": ["warn"],
+        // I rarely use reduce because it's weird, aparently this is a preferable way that is less bug prone?
+        // I don't particularly believe it, it doesn't make this compile:
+        //  const a = ["a", "b"] as const;
+        //  a.reduce<Record<typeof a[number], true>>((obj, n) => ({ ...obj, [n]: true }), {});
+        // and in this case I know the typecast would be valid but only because it uses typeof a in it
+        // so I can see how using type cast would let in issues, like if I had given it different keys
+        // it would be considered as definitely existing. So in a case like this the typecast seems reasonable
+        // either way I feel like you should be aware of the rule and override it explicitly if you need the typecast.
+        "@typescript-eslint/prefer-reduce-type-parameter": ["warn"],
+        // the classic [3,20,100].sort() sorting numbers alphabetically is annoying
+        // note that `strArr.sort((a, b) => a.localeCompare(b))` is prefered for strings.
+        // but just a comment to disable rule is perfectly fine.
+        "@typescript-eslint/require-array-sort-compare": ["warn"],
+        // during refactoring it is frequently helpful to have it pointed out that there is
+        // no longer any reason for a function to be async, but it is equally useful to
+        // be allowed to just ignore that information instead of further refactoring it.
+        "@typescript-eslint/require-await": ["warn"],
+        // accidentally grabbing unbound methods can lead to undefined this errors.
+        // this will flag possible issues, if you know it's a false positive then disable per use
+        // if this is raising a lot of false positives then probably disable the rule.
+        "@typescript-eslint/unbound-method": ["warn"],
+        // there are cases where use of async functions are unintuitive,
+        // in these cases you should probably consider what the code will actually do
+        // keeping in mind that when library code calls your async function it immidiately starts
+        // running and if it does any await then other code can continue right away, so a
+        // `arr.forEach` passed an async function will run each element essentially in parllel.
+        // it is quite possible that cases this flags as issue are actually not and commenting on why is fine.
+        "@typescript-eslint/no-misused-promises": ["warn"],
+
+        // for the most part the rule `prefer-template` and it's auto fix cover this
+        // for additional cases typescript allows some things that are probably mistakes:
+        // `const x: string | undefined;  x+="more text"` is perfectly acceptable to typescript
+        // since adding undefined to a string is allowed.
+        // this is enabled as warning so you conciously consider if adding makes sense for the types being used.
+        // in cases where it might be weird the comment to disable the rule is sufficient
+        "@typescript-eslint/restrict-plus-operands": ["warn"],
+
+        // frequently will come up with this during development, usually want to refactor eventually.
+        // other cases this flags actual possible program mistakes.
+        "@typescript-eslint/no-unnecessary-condition": [
+            "warn",
+            { "allowConstantLoopConditions": true }
+        ],
+        // typescript will know the condition is false in second case so no-unnecessary-condition will give warning already
+        // this will be extra info, may want to disable instead?
+        "no-dupe-else-if": "warn",
+
+        // this is just a warning because it shouldn't get in the way of development,
+        // but it should rarely be ignored.
+        // calling .then should either be passed the second callback to handle an error or be followed by .catch to catch errors in
+        // both original and the .then case.
+        // if you just call an async function without doing anything with the returned promise you are
+        // missing a chance to handle it.
+        // if you explicitly want to ignore the floating promise, then tell people by disabling the rule for that line, but don't make a habbit of it.
+        "@typescript-eslint/no-floating-promises": ["warn"],
+        // doing ${x} inside '' or "" won't do anything, you need backticks `` to be a template
+        // if you intend to use the literal characters `${` in a string then override this rule.
+        // just the comment to disable the rule is enough to clearly convey intent.
+        "no-template-curly-in-string": "warn",
+
+        // overruling this with eslint-disable is totally fine.
+        // usually second comma is accident and if intentinal then
+        // the eslint comment means the reader is expecting a sparse array.
+        "no-sparse-arrays": "warn",
+        // there are cases where the loop should be parallelized and cases where it can't
+        // this rule makes you consider if you can improve and either change it or disable for the specific case.
+        "no-await-in-loop": "warn",
+
+        // logging info is useful while debugging and frequently you intend to remove your debugging afterwards.
+        // so the intent is to bring attention to short term uses of console and
+        // let long term console have eslint-disable comments
+        "no-console": "warn",
+        // the rule description says checking for control characters is usually a mistake,
+        // so if it is then correct it, if not then disable the rule.
+        "no-control-regex": "warn"
+    }
+}

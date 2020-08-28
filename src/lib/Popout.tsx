@@ -19,7 +19,10 @@ interface Popout_AllProps extends React.PropsWithChildren<Popout_DefProps> {
      * height of opened window in pixels, must be >=  100
      */
     h: number;
-} // required props go in here.
+}
+
+/* eslint-disable @typescript-eslint/explicit-member-accessibility, 
+@typescript-eslint/no-extraneous-class,@typescript-eslint/no-magic-numbers */
 /** props defined with default values. */
 class Popout_DefProps {
     /**
@@ -31,6 +34,14 @@ class Popout_DefProps {
      */
     Tag: keyof React.ReactHTML = "aside";
 }
+/* eslint-enable @typescript-eslint/explicit-member-accessibility, 
+@typescript-eslint/no-extraneous-class,@typescript-eslint/no-magic-numbers */
+/**
+ * the opened window has a minimum size of 100 by 100 pixels,
+ * it is required for w and h to be passed via props but if we somehow tried to spawn a window
+ * before the props were read then we need some valid value and it only makes sense to use 100.
+ */
+const MOST_REASONABLE_DEFAULT_FOR_W_AND_H = 100;
 /**
  * Container that supports popping out the content into a seperate window
  * this may prove useful for side menus that might want to decide which side of screen etc
@@ -41,8 +52,8 @@ export class Popout_Cls extends HookCls<Popout_AllProps> {
     private window: Window | null = null;
     @HookCls.RenderAffecting
     private bodyElem: HTMLBodyElement | null = null;
-    private wWidth: number = 100;
-    private wHeight: number = 100;
+    private wWidth = MOST_REASONABLE_DEFAULT_FOR_W_AND_H;
+    private wHeight = MOST_REASONABLE_DEFAULT_FOR_W_AND_H;
     protected useRender(props: Popout_AllProps) {
         this.wWidth = props.w;
         this.wHeight = props.h;
@@ -73,7 +84,7 @@ export class Popout_Cls extends HookCls<Popout_AllProps> {
         if (this.window === null || title === undefined) return;
         this.window.document.title = title;
     }
-    private spawnWindow = () => {
+    private readonly spawnWindow = () => {
         // don't do anything if we already have a window
         if (this.window !== null) return;
 
@@ -92,13 +103,13 @@ export class Popout_Cls extends HookCls<Popout_AllProps> {
         assert(this.bodyElem !== null, "could not get body from new window.");
         this.window.addEventListener("unload", this.onClose);
     };
-    private closeWindow = () => {
+    private readonly closeWindow = () => {
         if (this.window === null) return;
         this.window.close();
         this.onClose();
     };
     /** called by the opened window closing, cleans up references */
-    private onClose = () => {
+    private readonly onClose = () => {
         this.window = null;
         this.bodyElem = null;
     };

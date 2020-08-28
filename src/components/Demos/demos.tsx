@@ -23,6 +23,8 @@ Demos.JSX = _JSX;
 export default Demos.JSX;
 
 class PopoutDemo extends HookedComponent {
+    // TODO: old hookedComponent, should replace with newer one
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     @HookedComponent.RenderAffecting
     private count = 0;
     public useRender() {
@@ -47,7 +49,7 @@ const _JSXPopoutDemo = HookedComponent.finalize(PopoutDemo);
 PopoutDemo.JSX = _JSXPopoutDemo;
 
 class ReduxDemo extends HookedComponent {
-    private textFieldRef = React.createRef<HTMLInputElement>();
+    private readonly textFieldRef = React.createRef<HTMLInputElement>();
 
     public useRender() {
         const bgcolour = useFormInput("yellow");
@@ -66,7 +68,7 @@ class ReduxDemo extends HookedComponent {
             </form>
         );
     }
-    private changeBackground = () => {
+    private readonly changeBackground = () => {
         // throw new Error("ERROR?")
         actions.changeBg(this.textFieldRef.current?.value);
     };

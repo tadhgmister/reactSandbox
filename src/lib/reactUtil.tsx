@@ -1,6 +1,6 @@
 import React from "react";
 import { Switch, Route, useRouteMatch, Redirect } from "react-router";
-import { ObjectEntries, ObjectKeys } from "./util";
+import { JSONstringify, ObjectEntries, ObjectKeys } from "./util";
 import { useGenEffect } from "./hooks";
 import { Link } from "react-router-dom";
 import resolvePathname from "resolve-pathname";
@@ -9,7 +9,7 @@ import resolvePathname from "resolve-pathname";
  * debugging purposes, returns a `<pre>` with the stringified props.
  */
 export function Expose(props: any) {
-    return <pre>{JSON.stringify(props, undefined, 3)}</pre>;
+    return <pre>{JSONstringify(props)}</pre>;
 }
 
 interface StylesheetProps {
@@ -22,7 +22,7 @@ interface StylesheetProps {
 function parseOneStyle(selector: string, style: React.CSSProperties) {
     let code = "";
     for (const [field, value] of ObjectEntries(style)) {
-        code += camelToDash(field) + ":" + value + ";";
+        code += `${camelToDash(field)}:${value};`;
     }
     return `${selector} {${code}}`;
 }
@@ -106,7 +106,7 @@ function* generateRoutes(paths: Array<[string, React.ComponentType]>) {
             // if the given path ends with / then redirect the version without slash to trailing slash
             yield (
                 <Redirect
-                    key={path + "fix"}
+                    key={`${path}fix`}
                     strict
                     exact
                     from={path.replace(/\/+$/, "")}
@@ -114,7 +114,7 @@ function* generateRoutes(paths: Array<[string, React.ComponentType]>) {
                 />
             );
         }
-        yield (<Route key={path + "route"} strict path={path} component={comp} />);
+        yield (<Route key={`${path}route`} strict path={path} component={comp} />);
     }
 }
 /**
@@ -161,7 +161,12 @@ export function useMediaQuery(queryString: string) {
  * react lazy component that will never resolve
  * can be used when waiting on async call to hide up to suspense.
  */
-export const Unrenderable = React.lazy(() => new Promise(() => {}));
+export const Unrenderable = React.lazy(
+    async () =>
+        new Promise(() => {
+            // whole point of being unrenderable is that there is no code to resolve promise.
+        }),
+);
 /**
  * wrapper for react-router Switch
  * replaces the `path` prop (and `to` and `from` for redirects) to be relative to the current match
@@ -191,4 +196,17 @@ export function RelSwitch({ children }: React.PropsWithChildren<{}>) {
             })}
         </Switch>
     );
+}
+/**
+ * returns a callback that when passed an error will throw it inside render
+ * this is for if you are using async code and don't want to handle your promises
+ * use this and pass it's callback to the .catch of your promise and let someone else
+ * take care of it.
+ */
+export function useThrower() {
+    const [err, setErr] = React.useState<Error | null>(null);
+    if (err !== null) {
+        throw err;
+    }
+    return setErr;
 }

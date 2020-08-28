@@ -1,0 +1,19 @@
+// these only exist in newer versions of ESLint
+{
+    "rules": {
+        // shound indicate when precision is lost.
+        // ts does give a warning but vscode doesn't make it obvious
+        "no-loss-of-precision": "warn",
+
+        // technically this is applicable for all void functions, but promise exceutor is one that should be warned about
+        "no-promise-executor-return": "warn",
+
+        // the page explaining this rule is very difficult to understand, presumably it exists to help but I have no idea.
+        "no-useless-backreference": "warn",
+
+        // having break in loop is usually a mistake, and if not a mistake just refactor to use an if statement
+        "no-unreachable-loop": "warn",
+        // behaviour of default when its not the last case is very weird.
+        "default-case-last": "warn"
+    }
+}

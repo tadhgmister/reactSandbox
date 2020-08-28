@@ -1,6 +1,7 @@
 import React from "react";
-import { ObjectEntries, waitUntilIdle, wait } from "./util";
+import { ObjectEntries, waitUntilIdle, wait, isDefined } from "./util";
 import { useGenEffect } from "./hooks";
+import { useThrower } from "./reactUtil";
 // import { useGenEffect } from "./hooklib";
 // import { waitUntilIdle } from "./util";
 
@@ -73,12 +74,12 @@ export function* possibleCollisions<T extends ObjectWithCollision>(objs: T[], ma
         yield `${x + 1}, ${y + 1}`; // I
     }
     // fill into bins.
-    const bins: Record<string, T[]> = {};
+    const bins: Record<string, T[] | undefined> = {};
     for (const obj of objs) {
         const key = `${Math.floor(obj.x / maxr)},${Math.floor(obj.y / maxr)}`;
         (bins[key] ?? (bins[key] = [])).push(obj);
     }
-    for (const [key, contents] of ObjectEntries(bins)) {
+    for (const [key, contents] of ObjectEntries(bins, isDefined)) {
         // check all elements within the bin
         for (let i1 = 0; i1 < contents.length - 1; i1 += 1) {
             for (let i2 = i1 + 1; i2 < contents.length; i2 += 1) {
@@ -97,7 +98,7 @@ export function* possibleCollisions<T extends ObjectWithCollision>(objs: T[], ma
         }
     }
 }
-
+const DEFAULT_FPS = 15;
 /**
  * When the requestIdleCallback is defined on the browser this will schedule updates to happen
  * as frequently as possible without lowering performance, passing the amount of time passed since last call in as an argument
@@ -105,14 +106,19 @@ export function* possibleCollisions<T extends ObjectWithCollision>(objs: T[], ma
  * @param callback callback to be called periodically ( argument is ms since last call)
  * @param minFPS lowest acceptable call frequency (calls per second), this affects the timeout used.
  */
-export function useIntermittentUpdate(callback: (msSinceLastCall: number) => void, minFPS = 15) {
+export function useIntermittentUpdate(
+    callback: (msSinceLastCall: number) => void,
+    minFPS = DEFAULT_FPS,
+) {
     const ref = React.useRef<[typeof callback, number]>();
+    const promiseHandler = useThrower();
     // need time in ms, FPS=1/s -> 1/FPS = s * 1000ms/s = 1000/minFPS (ms)
+    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
     ref.current = [callback, 1000 / minFPS];
     useGenEffect(setup());
     function* setup() {
         yield [];
-        loop(); // start the loop
+        loop().catch(promiseHandler); // start the loop
         yield;
         ref.current = undefined; // loop will stop when this is set to undefined.
     }
@@ -122,14 +128,16 @@ export function useIntermittentUpdate(callback: (msSinceLastCall: number) => voi
         /** time since last callback */
         let b = 0;
         while (ref.current !== undefined) {
-            const [callback, timeout] = ref.current;
-            if (waitUntilIdle) {
+            const [currCallback, timeout] = ref.current;
+            if (waitUntilIdle !== undefined) {
+                // eslint-disable-next-line no-await-in-loop
                 await waitUntilIdle(timeout);
             } else {
+                // eslint-disable-next-line no-await-in-loop
                 await wait(timeout);
             }
             [a, b] = [performance.now(), a];
-            callback(a - b);
+            currCallback(a - b);
         }
     }
 }

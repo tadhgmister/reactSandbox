@@ -1,0 +1,62 @@
+/*
+these rules are enabled as warn because I haven't specifically looked at them
+once I see an error for one I will sort it into the relevent section.
+*/
+{
+    "plugins": ["@typescript-eslint"],
+    "rules": {
+        // I don't see how this rule makes sense
+        "no-compare-neg-zero": "warn",
+
+        /*=======================  OTHERS ====================================*\
+        | rules that are not from Possible Errors list in eslint or typescript |
+        | these are extra from what was established to be included in noop     |
+        \*====================================================================*/
+
+        // accessors should always be together, much like function overloads.
+        "grouped-accessor-pairs": "warn",
+        // destructure with nested fields can be confusing, technically no variables are created so it's easy for typescript to
+        // see that nothing is new, but adding a warning with a bit clearer message is nice.
+        "no-empty-pattern": "warn",
+        // this rule expects a comment of `//fall through` at a place you intent to fall through
+        // otherwise it allows adjacent cases and break/return/throw so there is no reason to do otherwise
+        "no-fallthrough": "error",
+        // if you meant to use octal please add a eslint-disable-next-line
+        // otherwise don't use leading 0, it changes the meaning of the number.
+        "no-octal": "warn",
+        // octal escape sequences are deprecated, use unicode or hex instead
+        "no-octal-escape": "warn",
+        // in javascript doing (x,y) computes both x and y (may have side effects) but throws out x and just gives y.
+        // this is possibly a mistake where a list was intended, or you are trying to be terse, either way - don't.
+        // in conditons of while loops a second set of parenthasis is not considered an error.
+        "no-sequences": "warn",
+        // loops probably need the condition to change, a good example is:
+        // for(let j=1; j < myArr.length; i++){alert(myArr[j])}
+        // in this example the variable `i` was accidentally put in the incrementer
+        // so the loop will never exit since `j` used in the break condition was never touched.
+        "no-unmodified-loop-condition": "warn",
+        // promise rejections should be handled the same way as `throw`, it should use an error.
+        "prefer-promise-reject-errors": "warn",
+        // you are hiding an outer variable, this is quite possibly fine but you might consider renaming it.
+        "no-shadow": "warn",
+        // in cases it's possible a => got mis typed as a >= or =<
+        // so when it's near conditional stuff this warns that it's really confusing
+        "no-confusing-arrow": "warn",
+        // there are a number of obscure scoping issues with var, just don't use it
+        "no-var": "warn",
+        // auto fix for this just removes the rename, no real issue
+        "no-useless-rename": "warn",
+        // arrow functions really shine when used as callbacks or other arguments to functions.
+        "prefer-arrow-callback": "warn",
+        // typescript only enforces === behaviour, the actual behaviour of == is super weird
+        // see https://www.ecma-international.org/ecma-262/5.1/#sec-11.9.3 specifically the steps if x and y aren't the same type.
+        // it means stuff like `[] == false` is true.
+        "eqeqeq": "warn",
+
+        // will replace x + "stuff" + y with `${x}stuff${y}` which is much cleaner
+        "prefer-template": "warn",
+        // generator without yield is pretty useless, usually this is just temporary during refactoring but
+        // useful to be flagged.
+        "require-yield": "warn"
+    }
+}

@@ -7,8 +7,12 @@ interface Tile_AllProps extends React.PropsWithChildren<Tile_DefProps> {
     y: number;
     del: (x: number, y: number) => void;
 }
+/* eslint-disable @typescript-eslint/explicit-member-accessibility, 
+@typescript-eslint/no-extraneous-class,@typescript-eslint/no-magic-numbers */
 /** props defined with default values. */
 class Tile_DefProps {}
+/* eslint-enable @typescript-eslint/explicit-member-accessibility, 
+@typescript-eslint/no-extraneous-class,@typescript-eslint/no-magic-numbers */
 
 /**
  * this is a tile in the match 3 game, mostly deals with nice dropping animation,
@@ -38,7 +42,7 @@ export class Tile_Cls extends HookCls<Tile_AllProps> {
             </div>
         );
     }
-    get style(): React.CSSProperties {
+    private get style(): React.CSSProperties {
         if (this.falling) {
             return { animationName: styles.drop1, animationDuration: "1s" };
         } else {

@@ -6,22 +6,29 @@ import { fetchFolderContent } from "src/api";
 
 export class Glee extends HookCls {
     @HookCls.RenderAffecting
-    routes?: React.ComponentType;
+    private routes?: React.ComponentType;
+    @HookCls.RenderAffecting
+    private err: Error | null = null;
     constructor() {
         super();
-        this.fetchSongList();
+        this.fetchSongList().catch((err) => {
+            this.err = err;
+        });
     }
-    async fetchSongList() {
+    private async fetchSongList() {
         let songs = await fetchFolderContent("gleemusic/");
         songs = songs.filter((f) => !f.startsWith("."));
         const paths: Record<string, SongPage> = {};
         for (const song of songs) {
-            paths[song] = new SongPage(song + "/");
+            paths[song] = new SongPage(`${song}/`);
         }
         this.routes = makeCompSwitch(paths);
     }
 
-    useRender() {
+    public useRender() {
+        if (this.err !== null) {
+            throw this.err;
+        }
         if (this.routes === undefined) return <p>not loaded yet</p>; // TODO: return unresolved lazy?
         return <this.routes />;
     }

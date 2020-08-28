@@ -2,11 +2,11 @@ import { makeCompSwitch } from "src/lib/reactUtil";
 import React from "react";
 
 export const Routes = makeCompSwitch({
-    "/splash/": React.lazy(() => import("./Splash/App")),
-    "/demos/": React.lazy(() => import("./Demos/demos")),
-    "/asteroids/": React.lazy(() => import("./Asteroids/Game")),
-    "/gleemusic/": React.lazy(() => import("./GLEEEEE/HOOOOME")),
-    "/match game/": React.lazy(() => import("./Match3/MatchGame")),
-    "/glee_updated/": React.lazy(() => import("./Glee2")),
+    "/splash/": React.lazy(async () => import("./Splash/App")),
+    "/demos/": React.lazy(async () => import("./Demos/demos")),
+    "/asteroids/": React.lazy(async () => import("./Asteroids/Game")),
+    "/gleemusic/": React.lazy(async () => import("./GLEEEEE/HOOOOME")),
+    "/match game/": React.lazy(async () => import("./Match3/MatchGame")),
+    "/glee_updated/": React.lazy(async () => import("./Glee2")),
 });
 export default Routes;

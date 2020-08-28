@@ -49,7 +49,7 @@ export class ClsComponent extends React.Component<Props, { loc: Point }> {
         };
         this.handleKey = this.handleKey.bind(this);
     }
-    render() {
+    public render() {
         return (
             <div
                 style={{
@@ -63,15 +63,15 @@ export class ClsComponent extends React.Component<Props, { loc: Point }> {
             </div>
         );
     }
-    componentDidMount() {
+    public componentDidMount() {
         window.addEventListener("keypress", this.handleKey);
     }
-    componentWillUnmount() {
+    public componentWillUnmount() {
         window.removeEventListener("keypress", this.handleKey);
     }
-    handleKey(ev: KeyboardEvent) {
+    private readonly handleKey = (ev: KeyboardEvent) => {
         this.setState((s) => ({ loc: updatePos(s.loc, ev) }));
-    }
+    };
 }
 
 export function FuncComponent(props: Props) {
@@ -98,6 +98,7 @@ export function FuncComponent(props: Props) {
 
 ///////
 export class InstVarsComponent extends HookedComponent<Props> {
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     @HookedComponent.RenderAffecting
     public loc: Point = { x: 0, y: 0 };
 
@@ -145,10 +146,10 @@ export class StateVarsComponent extends _BASE<Props> {
 export class Counter extends statefulHookedComponent({ count: 0 })<{}> {
     // @HookedComponent.RenderAffecting
     public message = "hello ";
-    private increment = () => {
+    private readonly increment = () => {
         this.updateState("count", (count) => count + 1);
     };
-    handle = (ev: KeyboardEvent) => {
+    private readonly handle = (ev: KeyboardEvent) => {
         this.message += " ";
         this.message += ev.key;
     };
@@ -169,5 +170,5 @@ export class Counter extends statefulHookedComponent({ count: 0 })<{}> {
             </button>
         );
     }
-    static JSX = HookedComponent.finalize(Counter);
+    public static readonly JSX = HookedComponent.finalize(Counter);
 }

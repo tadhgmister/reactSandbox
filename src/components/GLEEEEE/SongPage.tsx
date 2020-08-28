@@ -7,25 +7,35 @@ function isValidAudio(filename: string) {
     return [".mp3", ".m4a", ".wav"].some((ext) => filename.endsWith(ext));
 }
 export class SongPage extends HookComp {
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     @HookComp.RenderAffecting
-    audioFiles: string[] = [];
+    public audioFiles: string[] = [];
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     @HookComp.RenderAffecting
-    lyricsFile?: string;
+    public lyricsFile?: string;
 
-    rootFolder: string;
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    @HookComp.RenderAffecting
+    private err: Error | null = null;
+
+    public rootFolder: string;
     constructor(songname: string) {
         super();
         this.rootFolder = `/gleemusic/${songname}/`;
-        this.fetchFiles();
+        this.fetchFiles().catch((err) => {
+            this.err = err;
+        });
     }
-    async fetchFiles() {
+    public async fetchFiles() {
         const files = await fetchFolderContent(this.rootFolder);
         this.lyricsFile = files.find((file) => file.endsWith(".pdf"));
 
         this.audioFiles = files.filter(isValidAudio);
     }
-    useRender() {
-        console.log("GOT TO SONG PAGE");
+    public useRender() {
+        if (this.err !== null) {
+            throw this.err;
+        }
         return (
             <Main className="flex-row SongPage">
                 <aside className="music-list">
@@ -50,7 +60,7 @@ export class SongPage extends HookComp {
             </Main>
         );
     }
-    getLyrics() {
+    public getLyrics() {
         if (this.lyricsFile === undefined) {
             return <p>"Cannot find lyrics"</p>;
         } else {

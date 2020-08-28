@@ -18,6 +18,8 @@ function Nav() {
                 <Link to={path}>Back</Link>
             </Route>
         </Switch>,
+        // I know topbar exists because it's hardcoded into the index.html
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         document.getElementById("topbar")!,
     );
 }
@@ -28,11 +30,11 @@ function Nav() {
  * also uses a Suspense here to slightly simplify structure of app.
  */
 class ErrorCatch extends React.Component<{}, { err: Error | null }> {
-    state: { err: Error | null } = { err: null };
-    componentDidCatch(err: Error) {
+    public state: { err: Error | null } = { err: null };
+    public componentDidCatch(err: Error) {
         this.setState({ err: err });
     }
-    render() {
+    public render() {
         if (this.state.err === null) {
             return <React.Suspense fallback="LOADING!">{this.props.children}</React.Suspense>;
         } // else: error case

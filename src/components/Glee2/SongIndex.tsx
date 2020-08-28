@@ -21,7 +21,7 @@ export class SongIndex_Cls extends HookCls {
     @HookCls.RenderAffecting
     private songlist?: string[];
     @HookCls.RenderAffecting
-    private error = null;
+    private error: Error | null = null;
     constructor() {
         super();
         void api.fetchFolderContent("gleemusic").then(
@@ -34,7 +34,7 @@ export class SongIndex_Cls extends HookCls {
         );
     }
     protected useRender() {
-        if (this.error) {
+        if (this.error !== null) {
             // just throw and let the error catcher get it,
             // theres not much better handling we could do here.
             throw this.error;

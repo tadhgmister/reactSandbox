@@ -1,0 +1,69 @@
+/**
+this contains rules that are intended primarily for their auto fix,
+things like inconsistent whitespace and sorting imports.
+All rules in this file should have auto fix that improves style.
+ */
+{
+    "rules": {
+        // not sure if this will conflict with prettier,
+        "brace-style": "off",
+        "@typescript-eslint/brace-style": ["warn", "1tbs", { "allowSingleLine": true }],
+
+        // when no-implicit-any is enabled accessing fields which aren't known is already an error,
+        // TODO: revisit
+        "@typescript-eslint/dot-notation": ["warn", { "allowPrivateClassPropertyAccess": true }],
+        // formatters usually cover this, the main part is that there are 2 use cases where this is important:
+        // 1: change an interface to a class, in which case commas are invalid
+        // 2: copy an interface to an object to write each field, in which case semicolons are invalid
+        // since both cases require some refactoring
+        //  (adding visibility and method implementations for class,
+        //    change type to values for object)
+        // it doesn't make a huge difference which style is chosen, I'll take semi colon since thats what typescript recommends.
+        "@typescript-eslint/member-delimiter-style": [
+            "warn",
+            {
+                "multiline": {
+                    "delimiter": "semi",
+                    "requireLast": true
+                },
+                "singleline": {
+                    "delimiter": "semi",
+                    "requireLast": false
+                }
+            }
+        ],
+        // TODO: come back to this, may end up putting it in noop instead.
+        "@typescript-eslint/member-ordering": ["off"],
+        // remove extra semicolons is nice. the main use is that arrow function properties in a class should
+        // have semicolons but methods should not, so in a class where both are used removing them from the methods
+        // is nice.
+        "no-extra-semi": "off",
+        "@typescript-eslint/no-extra-semi": ["warn"],
+        // use typescript inference when ever you can, particularly `const a = 5` types it as `5`
+        // so adding type `number` actually loses information
+        // (even though it rarely makes a difference it is useful for dev inspection)
+        "@typescript-eslint/no-inferrable-types": ["warn"],
+        // using `== true` or similar is redundant, this will remove it to use the boolean directly.
+        "@typescript-eslint/no-unnecessary-boolean-literal-compare": ["warn"],
+        // it's possible the addition of readonly auto-fix during development may get annoying but
+        // but shouldn't be too bad, otherwise just adding readonly to indicate it shouldn't be changed
+        // is pretty reasonable for private fields that don't change.
+        // note that I'd really like to not require this for lambda members but the option
+        // only lets you ONLY require this for lambdas which is the opposite of what I want, weird.
+        "@typescript-eslint/prefer-readonly": ["warn"],
+        // double quotes are prefered because they are compatible with JSON and HTML
+        // however all cases where a `"` character appears in the string using different quotes is
+        // perfectly fine as well.
+        "quotes": "off",
+        "@typescript-eslint/quotes": [
+            "warn",
+            "double",
+            { "avoidEscape": true, "allowTemplateLiterals": true }
+        ],
+
+        "no-extra-boolean-cast": "warn",
+        // multiple spaces gets replaced with ` {3}` in regex
+        // nice rule, I can't imagine not doing this manually though.
+        "no-regex-spaces": "warn"
+    }
+}

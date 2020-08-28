@@ -1,8 +1,9 @@
 import React from "react";
 import { assert } from "./util";
 ////////// GEN EFFECT
-
-export type GenEffect = Iterator<IArguments | any[] | undefined | void, void | (() => void)>;
+// void is being put in a position for the return of the generator, this is a fine use of void
+// eslint-disable-next-line @typescript-eslint/no-invalid-void-type
+export type GenEffect = Iterator<IArguments | any[] | undefined, void | (() => void)>;
 
 function isValidDependencies(val: any): val is React.DependencyList {
     // REact doesn't officially support IArguments objects but it does support indexing needed
@@ -88,7 +89,7 @@ export const geneffs = {
     /** applies focus to the referenced element when takeFocus switches to true. */
     *focus(ref: React.RefObject<HTMLElement>, takeFocus: boolean) {
         yield [ref.current, takeFocus];
-        if (takeFocus && ref.current) ref.current.focus();
+        if (takeFocus && ref.current !== null) ref.current.focus();
     },
 };
 

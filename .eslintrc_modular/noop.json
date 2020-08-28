@@ -1,0 +1,158 @@
+/*
+these rules are disabled, usually because typescript already does it better or 
+it's a style thing that conflicts with prettier formatter,
+or it just doesn't apply to me.
+*/
+// TODO: change all to "off" and maybe setup formatter ones with reasonable arguments
+// in the event someone wanted to enable them.
+{
+    "rules": {
+        // I like using string[] when the type is short
+        // or Array<React.ReactNode> when the name is longer
+        // and using option 'array-simple' suggestes nested lists
+        // should be Array<T[]> which is a little silly
+        "@typescript-eslint/array-type": "off",
+        // I strongly believe in infering types as much as possible
+        // TODO make note about alternate rule:
+        // I'd like to enforce `as const` when returning object literal without explciit return annotation
+        // because either there is a specific interface that is being returned in whci hcase
+        // return annotation should be used, or the object literal is a single use type in which case
+        // as const will make it narrow as much as possible.
+        "@typescript-eslint/explicit-function-return-type": "off",
+        // my ideal setup is that implicit any is a warning in most cases, but
+        // public fields, method parameters or exported functions should not allow implicit any at all.
+        // then infered type (like return of function) is perfectly fine but implicit any is not allowed.
+        // TODO: look into rule?
+        "@typescript-eslint/explicit-module-boundary-types": "off",
+        // typescript already checks that a variable is unconditionally assigned
+        // before it's used, there are cases for both init at declaration and init in both branches of if chain
+        // the rule I'd like is to auto fix declaring a variable then unconditionally assigning it on a later line
+        // it should just declare in the same space, but this is so rare I don't see a point to enforcing something like that.
+        "init-declarations": "off",
+        "@typescript-eslint/init-declarations": "off",
+        // not sure why typescript-eslint has a special rule because typescript already gives error on duplicate members.
+        "no-dupe-class-members": "off",
+        "@typescript-eslint/no-dupe-class-members": "off",
+        // these are equivelent: `interface Foo extends Bar {}` and `type Foo = Bar`
+        // in the case where templates are used like to have interface for a react component's props
+        // it makes sense to leave an empty place to add props later, so I don't want to warn on empty interface
+        // TODO: see if there is a rule to allow empty interfaces with comment or similar.
+        "@typescript-eslint/no-empty-interface": ["warn"],
+        // being able to use any is really important, it's much better than using `ts-ignore` a bunch
+        // searching for `as any` is pretty easy and having some code be untype safe should be allowed during development.
+        "@typescript-eslint/no-explicit-any": ["warn"],
+        // the `this` outside contexts where it makes sense typescript already gives it an appropriate type
+        // either undefined in global scope (so trying to use it gives reasonable errors) and inside functions it's implicit any so error.
+        // I don't think there is a linter rule needed to validate it.
+        "no-invalid-this": "off",
+        "@typescript-eslint/no-invalid-this": ["warn"],
+        // TODO: would want to enforce perameter properties to have valid docstrings
+        // but otherwise allow entirely.
+        "@typescript-eslint/no-parameter-properties": ["warn"],
+        // TODO: re-look at the options, might make sense to use this to some degree.
+        "@typescript-eslint/no-type-alias": ["warn"],
+        // being explicit is fine, this only applies to enum and namespaces anyway,
+        // refering to A.B like everywhere else in code instead of B inside the enum is fine.
+        "@typescript-eslint/no-unnecessary-qualifier": ["warn"],
+        // generic defaults are more likely to change (widen) then the code you use them
+        // I'd rather re-specify the default than have to go back and fix it after changing the default
+        "@typescript-eslint/no-unnecessary-type-arguments": ["warn"],
+        // TODO: check
+        // the documentation sais this should warn `3 as 3` as being unecessary but it didn't work for me.
+        "@typescript-eslint/no-unnecessary-type-assertion": ["warn"],
+        // TODO: see if there is a way related to warn about use of any
+        "@typescript-eslint/no-unsafe-assignment": ["warn"],
+        // using any to do member access when you know the member is valid is easier than explciit types
+        "@typescript-eslint/no-unsafe-member-access": ["warn"],
+        // typescript gives unused vars info and vscode greys out the variable, that is good enough for me.
+        // particularly since this may remove the variable which if auto-fix during development could get super annoying
+        "@typescript-eslint/no-unused-vars": ["warn"],
+        // I do use a `return helper(); function helper(){}` style for generator effects
+        // typescript covers pretty much all cases of using something before it's defined
+        // and I don't want to enforce declaring a type above it's use since top-down structuring is reasonable to me.
+        "@typescript-eslint/no-use-before-define": ["warn"],
+        // no auto fix to remove useless constructor (which kind of makes snese, might be annoying in dev)
+        // empty function body already covers empty constructor, and if just calling super I'm not going to force remove
+        // especially since this is typical for templates to include.
+        "@typescript-eslint/no-useless-constructor": ["warn"],
+        // not applicable with newer module syntax.
+        "@typescript-eslint/prefer-namespace-keyword": ["warn"],
+        // for complicated types it is far too annoying to do `RecursiveReadonly<T>` for every argument
+        // while I get that it's good form, it's so tiresome for rarely any benefit.
+        "@typescript-eslint/prefer-readonly-parameter-types": ["warn"],
+        // template literals for things with a reasonable toString is perfectly fine.
+        "@typescript-eslint/restrict-template-expressions": ["warn"],
+        // TODO: do I want to add this to another file to mention this?
+        // use a exaustiveCheck(x: never) in the default case of switch.
+        // will ensure that you hit all cases, and is more efficient since typescript is
+        // already doing that stuff and it has runtime behaviour of warning when a non typed value gets through.
+        "@typescript-eslint/switch-exhaustiveness-check": ["warn"],
+        // the documentation literally says it's not recommended for use.
+        "@typescript-eslint/typedef": ["warn"],
+
+        // can't use this, it results in typescript-eslint/unbound-method
+        // to act differently, will need to disable.
+        "@typescript-eslint/method-signature-style": ["off", "method"],
+        // TODO: is there not a rule that disallows RegExp constructor?
+        // they raise syntax error either way, I don't particularly care if it's at runtime or not.
+        "no-invalid-regexp": "warn",
+        // technically any json data should strictly not use these
+        // but without auto fix which couldn't even be implemented without type data
+        // then this isn't worth implementing
+        "no-prototype-builtins": "warn",
+
+        /*===============  JUST LET FORMATTER DEAL WITH IT ===============*\
+        | rules enforcing nice style, but might give slightly different    |
+        | behaviour from the prettier formatter so I don't want linter to  |
+        | complain about it.                                               |
+        \*================================================================*/
+        "comma-spacing": "off",
+        "@typescript-eslint/comma-spacing": "off",
+        "func-call-spacing": "off",
+        "@typescript-eslint/func-call-spacing": "off",
+        "indent": "off",
+        "@typescript-eslint/indent": "off",
+        "@typescript-eslint/keyword-spacing": "off",
+        "@typescript-eslint/lines-between-class-members": ["warn"],
+        "@typescript-eslint/no-extra-parens": ["warn"],
+        "@typescript-eslint/space-before-function-paren": ["warn"],
+        "@typescript-eslint/type-annotation-spacing": ["warn"],
+
+        "no-extra-parens": "warn",
+        "no-irregular-whitespace": "warn",
+
+        /*===============  DEPRECATED ===============*\
+        | rules that are replaced by other rules      |
+        \*===========================================*/
+
+        // replaced by '@typescript-eslint/ban-ts-comment'
+        "@typescript-eslint/ban-ts-ignore": "off",
+        // replaced by '@typescript-eslint/naming-convention'
+        "@typescript-eslint/camelcase": "off",
+        "@typescript-eslint/class-name-casing": "off",
+        "@typescript-eslint/generic-type-naming": "off",
+        "@typescript-eslint/member-naming": ["warn"],
+        // deprecated in favour of the [`explicit-module-boundary-types`] rule
+        "@typescript-eslint/no-untyped-public-signature": ["warn"],
+        // is experimental, see no-unused-vars
+        "@typescript-eslint/no-unused-vars-experimental": ["warn"],
+        // technically not deprecated but superceded by @typescript-eslint/no-require-imports
+        "@typescript-eslint/no-var-requires": ["warn"],
+
+        /*=========  HANDLED BY TYPESCRIPT ==============*\
+        | eslint rules that are already done by typescript|
+        \*===============================================*/
+        "getter-return": "off",
+        "no-constant-condition": "warn",
+        "no-dupe-args": "warn",
+        "no-dupe-keys": "warn",
+        "no-func-assign": "warn",
+        "no-import-assign": "warn",
+        "no-obj-calls": "warn",
+        "no-setter-return": "warn",
+        "no-unreachable": "warn",
+        "valid-typeof": "warn",
+        // handled more generally by typescript-eslint/no-misused-promises
+        "no-async-promise-executor": "warn"
+    }
+}

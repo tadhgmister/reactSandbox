@@ -1,21 +1,21 @@
 import * as redux from "redux";
 import React from "react";
-import { ObjectEntries, isDefined } from "./util";
+import { ObjectEntries, isDefined, ensure } from "./util";
 import ReactDOM from "react-dom";
 
 //// NOTE: initially this will be designed to only take ReduxStore objects into the state
 // later once that is working I will adapt it to take other types of state or use nested state as needed.
 
 const _SYMBOL_PEFIX = "tadhgredux.";
-const UPDATE = Symbol.for(_SYMBOL_PEFIX + "update");
-const INTERNAL = Symbol.for(_SYMBOL_PEFIX + "internal_data");
+const UPDATE = Symbol.for(`${_SYMBOL_PEFIX}update`);
+const INTERNAL = Symbol.for(`${_SYMBOL_PEFIX}internal_data`);
 class InternalData {
     /** indicates whether any updates have occured that still need to be dispatched to update dependents */
-    hasChanged = false;
+    public hasChanged = false;
     /** set of callbacks to be called when notifying components */
-    dependents = new Set<() => void>();
+    public dependents = new Set<() => void>();
     /** if hasChanged is true then notifies all dependents and sets hasChanged back to false, does nothing if hasChanged is false. */
-    notify_dependents() {
+    public notify_dependents() {
         if (!this.hasChanged) return;
         // TODO: should the hasChanged be set back to false before calling the callbacks or after?
         this.hasChanged = false;
@@ -66,12 +66,16 @@ interface UpdateAction<S extends Record<string, ReduxState>> extends redux.Actio
  * @param stateObject initial state
  */
 function makeReducer<S extends Record<string, ReduxState>>(stateObject: S) {
+    // it never really occured to me that the design of redux has the state have a default value
+    // but action doesn't, that is kind of weird huh?
+    // eslint-disable-next-line @typescript-eslint/default-param-last
     return function reducer(state: S = stateObject, { type, data }: UpdateAction<S>): S {
+        // TODO: fix type of input so (type !== "UPDATE") doesn't say always false
+        // and the (type as string) inside can be removed.
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (type !== "UPDATE") {
-            if (!(type as string).includes("INIT")) {
-                // allow the redux init action,
-                console.warn("got unrecognized redux action:", type);
-            }
+            // we want to give some warning if the type isn't a redux init action.
+            ensure((type as string).includes("INIT"), `got unrecognized redux action:${type}`);
             return state;
         }
         for (const [k, v] of ObjectEntries(data, isDefined)) {
@@ -82,7 +86,7 @@ function makeReducer<S extends Record<string, ReduxState>>(stateObject: S) {
 }
 export class StoreHelpers<S extends Record<string, ReduxState>> {
     /** underlying redux store */
-    private store: redux.Store<S, UpdateAction<S>>;
+    private readonly store: redux.Store<S, UpdateAction<S>>;
     /** indicates if we are in the middle of an update, set by Act callback to only trigger react notification after stable. */
     private midUpdate = false;
     constructor(state: S) {
@@ -131,7 +135,7 @@ export class StoreHelpers<S extends Record<string, ReduxState>> {
     public useState<T>(getFields: (state: S) => T): T {
         // need to create a proxy of S to pass into the getFields,
         // then proxy will track which fields were accessed and add a notifier to each one
-        const trigger_update = React.useReducer((n) => n + 1, 0)[1];
+        const trigger_update = React.useReducer((n: number) => n + 1, 0)[1];
         const to_unregister: Array<{ delete(a: typeof trigger_update): void }> = [];
         const { proxy, revoke } = Proxy.revocable(this.getState(), {
             get(state, field: keyof S) {

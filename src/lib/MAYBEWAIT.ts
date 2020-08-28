@@ -6,8 +6,8 @@ function* map<T, U = T>(
     func: (a: T) => U,
 ): Generator<U, ResolvePromise<U>[], ResolvePromise<U>> {
     const newarr: ResolvePromise<U>[] = [];
-    for (let idx = 0; idx < arr.length; idx++) {
-        const val = func(arr[idx]);
+    for (const elem of arr) {
+        const val = func(elem);
         let x = yield val;
         newarr.push(x);
     }
@@ -17,6 +17,7 @@ function* map<T, U = T>(
 export function wrapGenForMaybeAsyncFunc<P extends any[], T, R>(
     genFunc: (...args: P) => Generator<T, R, ResolvePromise<T>>,
 ) {
+    // ts-ignore
     function wrapper(...args: P) {
         const gen = genFunc(...args);
         return next(undefined as any);
@@ -39,7 +40,7 @@ export function wrapGenForMaybeAsyncFunc<P extends any[], T, R>(
     return wrapper;
 }
 
-const a = wrapGenForMaybeAsyncFunc(map);
+// const a = wrapGenForMaybeAsyncFunc(map);
 
-declare function M(a: number): string | Promise<boolean>;
-const x = a([1, 2, 3], M);
+// declare function M(b: number): string | Promise<boolean>;
+// const x = a([1, 2, 3], M);

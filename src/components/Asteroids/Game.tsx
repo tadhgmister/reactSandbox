@@ -24,6 +24,7 @@ function makeTimeoutCallback(initialWait: number, callback: () => number) {
 const SPEED = 0.1;
 const ASTEROID_SIZE = 10;
 const CANVAS_WIDTH = 200;
+const DELAY_MAKE_ASTEROID = 1000; // in ms
 
 /**
  * Game of asteroids, rendered inside a fixed size svg
@@ -34,10 +35,10 @@ export class Game_Cls extends HookCls {
     @HookCls.RenderAffecting
     public asteroids: Array<{ x: number; y: number; key: number }> = [{ x: 0, y: 100, key: 1 }];
     private stop_updating = false;
-    private asterref = React.createRef<Actor>();
+    private readonly asterref = React.createRef<Actor>();
     protected useRender() {
         useIntermittentUpdate(this.update);
-        if (this.asteroids?.[0].x > 100) {
+        if (this.asteroids[0].x > CANVAS_WIDTH) {
             this.stop_updating = true;
             // console.log("ASTER", this.asterref.current);
             // console.log("GAME", this);
@@ -49,6 +50,9 @@ export class Game_Cls extends HookCls {
                     {this.message}
                     <svg width={CANVAS_WIDTH} height={200}>
                         {this.asteroids.map((ast) => (
+                            // react/jsx-key doesn't use type information so it can't see that
+                            // key is unconditionally defined inside ...ast
+                            // eslint-disable-next-line react/jsx-key
                             <Actor {...ast} ref={this.asterref} />
                         ))}
                     </svg>
@@ -56,7 +60,7 @@ export class Game_Cls extends HookCls {
             </testContext.Provider>
         );
     }
-    private update = (time: number) => {
+    private readonly update = (time: number) => {
         if (this.stop_updating) return;
         this.asteroids = this.asteroids.map(({ x, ...rest }) => ({
             x: x + time * SPEED,
@@ -73,9 +77,9 @@ export class Game_Cls extends HookCls {
             }
         }
     }
-    private makeAsteroids = makeTimeoutCallback(0, () => {
+    private readonly makeAsteroids = makeTimeoutCallback(0, () => {
         this.asteroids.push();
-        return 1000;
+        return DELAY_MAKE_ASTEROID;
     });
 }
 /**

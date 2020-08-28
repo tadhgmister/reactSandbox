@@ -3,12 +3,7 @@ import { HookCls } from "src/lib/hookcls";
 import { Main } from "src/lib/reactUtil";
 import styles from "./Match3.module.css";
 import Tile from "./Tile";
-/** all props for MatchGame */
-interface MatchGame_AllProps extends React.PropsWithChildren<MatchGame_DefProps> {} // required props go in here.
-/** props defined with default values. */
-class MatchGame_DefProps {
-    // props with default values here. remember to document all props
-}
+
 interface TileInfo {
     content: string;
     id: number;
@@ -21,13 +16,12 @@ const GRID_SIZE = 8;
 /**
  * TODO: DESCRIBE CLASS HERE
  */
-export class MatchGame_Cls extends HookCls<MatchGame_AllProps> {
-    public static defaultProps = new MatchGame_DefProps();
+export class MatchGame_Cls extends HookCls {
     /**
      * this is render affecting but since we just modify in place we will call _force_update()
      * instead of re-writing the list.
      */
-    private tiles: TileInfo[][];
+    private readonly tiles: TileInfo[][];
     private nextId = 0;
     constructor() {
         super();
@@ -40,7 +34,7 @@ export class MatchGame_Cls extends HookCls<MatchGame_AllProps> {
             this.tiles.push(column);
         }
     }
-    protected useRender(props: MatchGame_AllProps) {
+    protected useRender() {
         return <Main className={styles.match3}>{[...this.renderTiles()]}</Main>;
     }
     private newTile(): TileInfo {
@@ -48,7 +42,7 @@ export class MatchGame_Cls extends HookCls<MatchGame_AllProps> {
         const c = characters.charAt(Math.floor(Math.random() * characters.length));
         return { content: c, id: this.nextId++ };
     }
-    private deleteTile = (x: number, y: number) => {
+    private readonly deleteTile = (x: number, y: number) => {
         this.tiles[x].splice(y, 1);
         this.tiles[x].push(this.newTile());
         this._force_update();
@@ -74,6 +68,3 @@ export const MatchGame = MatchGame_Cls.createComponent();
 /** type is an alias to MatchGame_Cls so that importing react component also imports ref type */
 export type MatchGame = MatchGame_Cls;
 export default MatchGame;
-/** props for MatchGame taking into account default props being optional */
-export type MatchGameProps = Omit<MatchGame_AllProps, keyof MatchGame_DefProps> &
-    Partial<MatchGame_AllProps>;

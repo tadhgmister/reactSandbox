@@ -3,6 +3,7 @@ import { HookCls } from "src/lib/hookcls";
 import { RouteComponentProps } from "react-router";
 import { Main } from "src/lib/reactUtil";
 import styles from "./Glee.module.css";
+import { JSONstringify } from "src/lib/util";
 type SongPageProps = RouteComponentProps<{ song: string }>;
 /**
  * displays lyrics and playable media for one song.
@@ -13,7 +14,7 @@ export class SongPage_Cls extends HookCls<SongPageProps> {
         return (
             <Main className={styles.SongPage}>
                 Will load song: {songTitle}
-                <pre>{JSON.stringify(props, undefined, 4)}</pre>
+                <pre>{JSONstringify(props)}</pre>
             </Main>
         );
     }

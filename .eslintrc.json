@@ -4,9 +4,15 @@
         "es6": true
     },
     "extends": [
-        "eslint:recommended",
+        // "eslint:recommended",
         "plugin:react/recommended",
-        "plugin:@typescript-eslint/eslint-recommended"
+        "plugin:@typescript-eslint/eslint-recommended",
+        ".eslintrc_modular/strict",
+        ".eslintrc_modular/recommended",
+        ".eslintrc_modular/overridable",
+        ".eslintrc_modular/auto_fix",
+        ".eslintrc_modular/unsorted"
+        // ".eslintrc_modular/noop"
     ],
     "globals": {
         "Atomics": "readonly",
@@ -14,6 +20,7 @@
     },
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
+        "project": "./tsconfig.json",
         "ecmaFeatures": {
             "jsx": true
         },
@@ -22,11 +29,13 @@
     },
     "plugins": ["react", "@typescript-eslint", "react-hooks"],
     "rules": {
-        "react-hooks/rules-of-hooks": "error",
+        "react/no-unescaped-entities": ["warn", { "forbid": [">", "}"] }],
+        "react-hooks/rules-of-hooks": "warn",
         "react-hooks/exhaustive-deps": "warn",
-        "indent": ["error", 4],
-        "linebreak-style": ["error", "unix"],
-        "quotes": ["error", "double"],
-        "semi": ["error", "always"]
+        // "indent": ["warn", 4, { "SwitchCase": 1 }],
+        "linebreak-style": ["warn", "unix"],
+        // unused vars is done by typescript, don't need second error.
+        "no-unused-vars": "off",
+        "no-constant-condition": ["warn", { "checkLoops": false }]
     }
 }
