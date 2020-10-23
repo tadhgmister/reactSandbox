@@ -1,6 +1,8 @@
 // these only exist in newer versions of ESLint
 {
     "rules": {
+        // TODO: check update to typescript-eslint
+        "@typescript-eslint/no-implicit-any-catch": "error",
         // shound indicate when precision is lost.
         // ts does give a warning but vscode doesn't make it obvious
         "no-loss-of-precision": "warn",
@@ -14,6 +16,9 @@
         // having break in loop is usually a mistake, and if not a mistake just refactor to use an if statement
         "no-unreachable-loop": "warn",
         // behaviour of default when its not the last case is very weird.
-        "default-case-last": "warn"
+        "default-case-last": "warn",
+
+        // doing `x! == y` and `x !== y` are different, warn if the `x!` is not in parenthasis (if you intend to do null assertion there)
+        "@typescript-eslint/no-confusing-non-null-assertion": "warn"
     }
 }

@@ -33,11 +33,6 @@ or it just doesn't apply to me.
         // not sure why typescript-eslint has a special rule because typescript already gives error on duplicate members.
         "no-dupe-class-members": "off",
         "@typescript-eslint/no-dupe-class-members": "off",
-        // these are equivelent: `interface Foo extends Bar {}` and `type Foo = Bar`
-        // in the case where templates are used like to have interface for a react component's props
-        // it makes sense to leave an empty place to add props later, so I don't want to warn on empty interface
-        // TODO: see if there is a rule to allow empty interfaces with comment or similar.
-        "@typescript-eslint/no-empty-interface": ["warn"],
         // being able to use any is really important, it's much better than using `ts-ignore` a bunch
         // searching for `as any` is pretty easy and having some code be untype safe should be allowed during development.
         "@typescript-eslint/no-explicit-any": ["warn"],

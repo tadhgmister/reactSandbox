@@ -3,6 +3,8 @@ these rules are enabled as warn because I haven't specifically looked at them
 once I see an error for one I will sort it into the relevent section.
 */
 {
+    // TODO: look at prefer-function-type for allowing mergable namespaces
+    // TODO: look at any-return to allow returning any when the function explicitly returns any type.
     "plugins": ["@typescript-eslint"],
     "rules": {
         // I don't see how this rule makes sense

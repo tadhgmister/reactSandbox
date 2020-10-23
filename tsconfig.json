@@ -1,8 +1,14 @@
 {
+    // "$schema": {},
     "compilerOptions": {
         "target": "ESNext",
-        "lib": ["dom", "dom.iterable", "esnext"],
+        "lib": [
+            "dom",
+            "dom.iterable",
+            "esnext"
+        ],
         "allowJs": true,
+        "checkJs": true,
         "skipLibCheck": true,
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
@@ -17,7 +23,14 @@
         "experimentalDecorators": true,
         "baseUrl": "./",
         "useDefineForClassFields": true,
-        "keyofStringsOnly": false
+        "keyofStringsOnly": false,
+        "plugins": [
+            // {
+            //     "name": "my-ts-plugin"
+            // }
+        ]
     },
-    "include": ["src"]
+    "include": [
+        "src"
+    ]
 }

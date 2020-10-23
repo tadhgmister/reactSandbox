@@ -1,0 +1,17 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+        "$schema": {},
+        "a": {
+            "description": "the a property obviously",
+            "type": "boolean",
+            "default": false
+        },
+        "b": {
+            "description": "the b property",
+            "type": "string"
+        }
+    },
+    "additionalProperties": {}
+}

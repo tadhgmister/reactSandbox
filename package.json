@@ -6,6 +6,7 @@
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.5.0",
     "@testing-library/user-event": "^7.2.1",
+    "@types/react-native": "^0.63.19",
     "puppeteer-cluster": "^0.22.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
@@ -38,6 +39,7 @@
     ]
   },
   "devDependencies": {
+    "@types/react": "^16.9.49",
     "@types/react-router": "^5.1.8",
     "@types/react-router-dom": "^5.1.5",
     "@types/redux": "^3.6.0"
